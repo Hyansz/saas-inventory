@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { Poppins, Geist_Mono } from "next/font/google";
 import QueryProvider from "@/providers/query-provider";
+import { Toaster } from "sonner";
 
 import "./globals.css";
 
@@ -38,6 +39,8 @@ export default function RootLayout({
         >
             <body className="min-h-full flex flex-col">
                 <QueryProvider>{children}</QueryProvider>
+
+                <Toaster position="top-center" richColors />
             </body>
         </html>
     );

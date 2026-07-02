@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "sonner";
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -29,10 +30,25 @@ api.interceptors.response.use(
         const isLoginRequest = requestUrl.includes("/login");
 
         if (error.response?.status === 401 && !isLoginRequest) {
+            const hadToken = !!localStorage.getItem("token");
+
             localStorage.removeItem("user");
             localStorage.removeItem("token");
 
-            window.location.href = "/";
+            // TAMPILKAN NOTIF CUMA KALAU SEBELUMNYA MEMANG PUNYA SESI AKTIF
+            if (hadToken) {
+                toast.error("Sesi Anda berakhir", {
+                    description:
+                        "Akun Anda sedang digunakan / login di perangkat lain.",
+                });
+            }
+
+            // KASIH JEDA DIKIT BIAR TOAST SEMPAT KELIATAN SEBELUM REDIRECT
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 1200);
+
+            return Promise.reject(error);
         }
 
         return Promise.reject(error);
