@@ -15,10 +15,6 @@ use App\Models\User;
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/debug-users', function () {
-    return User::select('id', 'name', 'email', 'role')->get();
-});
-
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
