@@ -1,8 +1,9 @@
 import axios from "axios";
 import api from "@/lib/axios";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export async function csrf() {
-    await axios.get("http://localhost:8000/sanctum/csrf-cookie", {
+    await axios.get(`${BACKEND_URL}/sanctum/csrf-cookie`, {
         withCredentials: true,
     });
 }

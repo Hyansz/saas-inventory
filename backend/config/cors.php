@@ -24,7 +24,7 @@ return [
 
     'allowed_origins' => [
         'http://localhost:3000',
-        'https://saa-s-inventory-alpha.vercel.app/',
+        'https://onlineinventory.vercel.app',
     ],
 
     'allowed_origins_patterns' => [],
