@@ -14,7 +14,9 @@ use App\Http\Controllers\Api\SearchController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
-
+Route::get('/debug-users', function () {
+    return User::select('id', 'name', 'email', 'role')->get();
+});
 
 Route::middleware('auth:sanctum')->group(function () {
 
