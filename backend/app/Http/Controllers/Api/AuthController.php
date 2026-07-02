@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -15,17 +16,22 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (!Auth::guard('web')->attempt($credentials, true)) {
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return response()->json([
                 'message' => 'Email atau password salah',
             ], 401);
         }
 
-        $request->session()->regenerate();
+        $user->tokens()->delete();
+
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login berhasil',
-            'user' => Auth::guard('web')->user(),
+            'user' => $user,
+            'token' => $token,
         ]);
     }
 
@@ -36,11 +42,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             'message' => 'Logout berhasil',
