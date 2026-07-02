@@ -5,7 +5,6 @@ echo "Running Laravel initialization..."
 php artisan storage:link || true
 
 php artisan migrate --force || true
-php artisan db:seed --force || true
 
 php artisan config:cache || true
 php artisan route:cache || true
