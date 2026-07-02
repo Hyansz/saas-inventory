@@ -133,7 +133,13 @@ export default function Topbar() {
             />
 
             {/* TOPBAR */}
-            <header
+            <motion.header
+                initial={{ y: -60, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{
+                    duration: 0.35,
+                    ease: [0.22, 1, 0.36, 1],
+                }}
                 className="
                     sticky
                     top-0
@@ -173,6 +179,7 @@ export default function Topbar() {
                                 transition
                                 hover:bg-zinc-50
                                 lg:hidden
+                                cursor-pointer
                             "
                         >
                             <Menu size={20} />
@@ -257,6 +264,7 @@ export default function Topbar() {
                                     py-2
                                     transition
                                     hover:bg-zinc-50
+                                    cursor-pointer
                                 "
                             >
                                 <div
@@ -386,6 +394,7 @@ export default function Topbar() {
                                                 text-red-600
                                                 transition
                                                 hover:bg-red-50
+                                                cursor-pointer
                                             "
                                             >
                                                 <LogOut size={18} />
@@ -398,7 +407,7 @@ export default function Topbar() {
                         </div>
                     </div>
                 </div>
-            </header>
+            </motion.header>
 
             {/* LOGOUT MODAL */}
             {logoutOpen && (
@@ -429,29 +438,6 @@ export default function Topbar() {
                             shadow-2xl
                         "
                     >
-                        {/* BG */}
-                        <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-red-100 opacity-60 blur-3xl" />
-
-                        {/* CLOSE */}
-                        <button
-                            onClick={() => setLogoutOpen(false)}
-                            className="
-                                absolute
-                                right-5
-                                top-5
-                                flex
-                                h-10
-                                w-10
-                                items-center
-                                justify-center
-                                rounded-2xl
-                                transition
-                                hover:bg-zinc-100
-                            "
-                        >
-                            <X size={18} />
-                        </button>
-
                         <div className="relative z-10">
                             <div
                                 className="
@@ -491,6 +477,7 @@ export default function Topbar() {
                                         font-medium
                                         transition
                                         hover:bg-zinc-50
+                                        cursor-pointer
                                     "
                                 >
                                     Cancel
@@ -509,6 +496,7 @@ export default function Topbar() {
                                         transition
                                         hover:bg-red-700
                                         disabled:opacity-50
+                                        cursor-pointer
                                     "
                                 >
                                     {loadingLogout
@@ -517,6 +505,33 @@ export default function Topbar() {
                                 </button>
                             </div>
                         </div>
+
+                        {/* BG */}
+                        <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-red-100 opacity-60 blur-3xl pointer-events-none" />
+
+                        {/* CLOSE */}
+                        <button
+                            onClick={() => setLogoutOpen(false)}
+                            className="
+                                absolute
+                                right-5
+                                top-5
+                                z-20
+                                flex
+                                h-10
+                                w-10
+                                items-center
+                                justify-center
+                                rounded-full
+                                transition-all
+                                hover:border
+                                hover:border-black/20
+                                cursor-pointer
+                                duration-200
+                            "
+                        >
+                            <X size={18} />
+                        </button>
                     </div>
                 </div>
             )}

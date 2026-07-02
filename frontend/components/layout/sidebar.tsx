@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-
+import { motion } from "framer-motion";
 import { useAuthStore } from "@/store/auth-store";
-
 import {
     LayoutDashboard,
     ArrowDownToLine,
@@ -142,7 +141,13 @@ export default function Sidebar({
                 />
             )}
 
-            <aside
+            <motion.aside
+                initial={!mobileOnly ? { x: -60, opacity: 0 } : false}
+                animate={!mobileOnly ? { x: 0, opacity: 1 } : {}}
+                transition={{
+                    duration: 0.35,
+                    ease: [0.22, 1, 0.36, 1],
+                }}
                 className={`
                     h-screen
                     w-[290px]
@@ -233,6 +238,7 @@ export default function Sidebar({
                                     transition
                                     hover:bg-zinc-100
                                     dark:hover:bg-zinc-900
+                                    cursor-pointer
                                 "
                             >
                                 <X size={18} />
@@ -403,7 +409,7 @@ export default function Sidebar({
 
                                 <div>
                                     <p className="text-sm font-semibold">
-                                        Inventory v2.0
+                                        Inventory v1.0
                                     </p>
 
                                     <p className="text-xs text-zinc-500 mt-1">
@@ -414,7 +420,7 @@ export default function Sidebar({
                         </div>
                     </div>
                 </div>
-            </aside>
+            </motion.aside>
         </>
     );
 }

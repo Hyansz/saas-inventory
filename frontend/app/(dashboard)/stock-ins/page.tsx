@@ -210,6 +210,7 @@ export default function StockInPage() {
                                     transition-all
                                     hover:scale-[1.02]
                                     active:scale-[0.99]
+                                    cursor-pointer
                                 "
                             >
                                 <Plus size={18} />

@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { useRouter } from "next/navigation";
-
 import {
     Mail,
     LockKeyhole,
@@ -11,15 +9,13 @@ import {
     EyeOff,
     Loader2,
 } from "lucide-react";
-
 import { login } from "@/services/auth";
-
 import { useAuthStore } from "@/store/auth-store";
 
 export default function HomePage() {
     const router = useRouter();
 
-    const setUser = useAuthStore((state) => state.setUser);
+    const setAuth = useAuthStore((state) => state.setAuth);
 
     const user = useAuthStore((state) => state.user);
 
@@ -50,7 +46,7 @@ export default function HomePage() {
                 password,
             });
 
-            setUser(response.user);
+            setAuth(response.user, response.token);
 
             router.replace("/dashboard");
         } catch (error: any) {

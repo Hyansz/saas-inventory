@@ -184,6 +184,7 @@ export default function AddStockOutModal({ open, onClose, onSuccess }: Props) {
                                     focus:ring-4
                                     focus:ring-zinc-200
                                     focus:bg-white
+                                    cursor-pointer
                                 "
                                 >
                                     <option value="">

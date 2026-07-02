@@ -223,6 +223,7 @@ export default function ItemsPage() {
                                     transition-all
                                     hover:scale-[1.02]
                                     active:scale-[0.99]
+                                    cursor-pointer
                                 "
                             >
                                 <Plus size={18} />
@@ -530,28 +531,6 @@ function StatCard({ title, value, icon, positive, danger }: any) {
                     }
                 `}
             >
-                {value}
-            </h3>
-        </div>
-    );
-}
-
-/* MINI */
-
-function MiniStat({ label, value }: any) {
-    return (
-        <div
-            className="
-                rounded-2xl
-                border
-                border-zinc-200
-                bg-zinc-50/70
-                p-4
-            "
-        >
-            <p className="text-xs text-zinc-500">{label}</p>
-
-            <h3 className="mt-2 text-2xl font-semibold tracking-tight">
                 {value}
             </h3>
         </div>

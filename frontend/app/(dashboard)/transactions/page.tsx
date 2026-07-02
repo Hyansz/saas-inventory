@@ -175,49 +175,24 @@ export default function TransactionsPage() {
                 <div className="relative z-10">
                     {/* TOP */}
 
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div
-                            className="
-                                inline-flex
-                                items-center
-                                gap-2
-                                rounded-full
-                                border
-                                border-white/10
-                                bg-white/10
-                                px-4
-                                py-2
-                                text-xs
-                                font-medium
-                                backdrop-blur-xl
-                            "
-                        >
-                            <FileText size={14} />
-                            Transaction Analytics
-                        </div>
-
-                        <button
-                            onClick={() => setOpenPrint(true)}
-                            className="
-                                inline-flex
-                                h-12
-                                items-center
-                                justify-center
-                                gap-2
-                                rounded-2xl
-                                bg-white
-                                px-5
-                                text-sm
-                                font-semibold
-                                text-black
-                                transition-all
-                                hover:scale-[1.02]
-                                active:scale-[0.99]
-                            "
-                        >
-                            <FileText size={18} />
-                            Cetak Laporan
-                        </button>
+                    <div
+                        className="
+                            inline-flex
+                            items-center
+                            gap-2
+                            rounded-full
+                            border
+                            border-white/10
+                            bg-white/10
+                            px-4
+                            py-2
+                            text-xs
+                            font-medium
+                            backdrop-blur-xl
+                        "
+                    >
+                        <FileText size={14} />
+                        Transaction Analytics
                     </div>
 
                     {/* CONTENT */}

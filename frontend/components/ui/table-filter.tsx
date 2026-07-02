@@ -76,14 +76,13 @@ export default function TableFilter({
                 {/* FILTER BUTTON */}
                 <button
                     onClick={() => setOpen((prev) => !prev)}
-                    className="w-full h-12 rounded-2xl border bg-white flex items-center justify-center gap-2 font-medium"
+                    className="w-full h-12 rounded-2xl border bg-white flex items-center justify-center gap-2 font-medium cursor-pointer"
                 >
                     <Filter size={18} />
                     Filter
                     {isFiltered && (
                         <span className="w-2 h-2 rounded-full bg-black" />
                     )}
-                    {/* 🔥 rotate animation */}
                     <motion.div
                         animate={{ rotate: open ? 180 : 0 }}
                         transition={{ duration: 0.2 }}
@@ -357,6 +356,7 @@ function FilterForm(props: any) {
                             focus:ring-4
                             focus:ring-zinc-100
                             appearance-none
+                            cursor-pointer
                         "
                     >
                         <option value="">Semua</option>

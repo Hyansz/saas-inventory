@@ -108,20 +108,20 @@ export default function ReportsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35 }}
                 className="
-        relative
-        overflow-hidden
-        rounded-[2.5rem]
-        border
-        border-white/10
-        bg-gradient-to-br
-        from-zinc-950
-        via-zinc-900
-        to-black
-        p-6
-        md:p-8
-        text-white
-        shadow-2xl
-    "
+                    relative
+                    overflow-hidden
+                    rounded-[2.5rem]
+                    border
+                    border-white/10
+                    bg-gradient-to-br
+                    from-zinc-950
+                    via-zinc-900
+                    to-black
+                    p-6
+                    md:p-8
+                    text-white
+                    shadow-2xl
+                "
             >
                 {/* Glow */}
 
@@ -137,19 +137,19 @@ export default function ReportsPage() {
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                         <div
                             className="
-                    inline-flex
-                    items-center
-                    gap-2
-                    rounded-full
-                    border
-                    border-white/10
-                    bg-white/10
-                    px-4
-                    py-2
-                    text-xs
-                    font-medium
-                    backdrop-blur-xl
-                "
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-full
+                                border
+                                border-white/10
+                                bg-white/10
+                                px-4
+                                py-2
+                                text-xs
+                                font-medium
+                                backdrop-blur-xl
+                            "
                         >
                             <FileSpreadsheet size={14} />
                             Export Center
@@ -162,25 +162,25 @@ export default function ReportsPage() {
                         <div className="max-w-3xl">
                             <h1
                                 className="
-                        text-4xl
-                        md:text-6xl
-                        font-semibold
-                        tracking-tight
-                        leading-none
-                    "
+                                    text-4xl
+                                    md:text-6xl
+                                    font-semibold
+                                    tracking-tight
+                                    leading-none
+                                "
                             >
                                 Laporan Inventory
                             </h1>
 
                             <p
                                 className="
-                        mt-5
-                        max-w-2xl
-                        text-sm
-                        md:text-base
-                        leading-relaxed
-                        text-zinc-300
-                    "
+                                    mt-5
+                                    max-w-2xl
+                                    text-sm
+                                    md:text-base
+                                    leading-relaxed
+                                    text-zinc-300
+                                "
                             >
                                 Generate laporan inventory profesional dalam
                                 format Excel maupun PDF. Semua transaksi barang
@@ -226,6 +226,7 @@ export default function ReportsPage() {
                                 focus:outline-none
                                 focus:ring-2
                                 focus:ring-black
+                                cursor-pointer
                             "
                         >
                             <option value="transactions">Transaksi</option>
@@ -349,6 +350,7 @@ export default function ReportsPage() {
                             hover:border-green-200
                             disabled:opacity-70
                             disabled:pointer-events-none
+                            cursor-pointer
                         "
                     >
                         <div
@@ -444,6 +446,7 @@ export default function ReportsPage() {
                             hover:border-red-200
                             disabled:opacity-70
                             disabled:pointer-events-none
+                            cursor-pointer
                         "
                     >
                         <div

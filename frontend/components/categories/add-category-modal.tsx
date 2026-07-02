@@ -176,6 +176,7 @@ export default function AddCategoryModal({ open, onClose, onSuccess }: Props) {
                             active:scale-[0.99]
                             disabled:opacity-50
                             disabled:cursor-not-allowed
+                            cursor-pointer
                         "
                     >
                         {loading ? "Menyimpan..." : "Simpan Kategori"}

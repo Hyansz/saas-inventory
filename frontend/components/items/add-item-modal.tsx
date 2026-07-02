@@ -92,7 +92,6 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
                     bg-white
                     p-0
                     gap-0
-
                     max-h-[90dvh]
                     overflow-hidden
                 "
@@ -182,23 +181,24 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
                                         })
                                     }
                                     className="
-                                    h-12
-                                    w-full
-                                    appearance-none
-                                    rounded-2xl
-                                    border
-                                    border-zinc-200
-                                    bg-zinc-50
-                                    px-4
-                                    pr-11
-                                    text-sm
-                                    outline-none
-                                    transition-all
-                                    focus:border-zinc-300
-                                    focus:bg-white
-                                    focus:ring-4
-                                    focus:ring-zinc-100
-                                "
+                                        h-12
+                                        w-full
+                                        appearance-none
+                                        rounded-2xl
+                                        border
+                                        border-zinc-200
+                                        bg-zinc-50
+                                        px-4
+                                        pr-11
+                                        text-sm
+                                        outline-none
+                                        transition-all
+                                        focus:border-zinc-300
+                                        focus:bg-white
+                                        focus:ring-4
+                                        focus:ring-zinc-100
+                                        cursor-pointer
+                                    "
                                 >
                                     <option value="">Pilih kategori</option>
 
@@ -394,6 +394,7 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
                             transition-all
                             hover:opacity-90
                             disabled:opacity-50
+                            cursor-pointer
                         "
                     >
                         {loading && (

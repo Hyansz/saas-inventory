@@ -155,6 +155,7 @@ export default function EditStockInModal({
                                     focus:outline-none
                                     focus:ring-4
                                     focus:ring-zinc-200
+                                    cursor-pointer
                                 "
                                 >
                                     <option value="">Pilih Barang</option>
