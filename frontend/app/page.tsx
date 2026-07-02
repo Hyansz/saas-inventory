@@ -257,6 +257,7 @@ export default function HomePage() {
                             items-center
                             justify-center
                             gap-2
+                            cursor-pointer
                         "
                     >
                         {loading && (
