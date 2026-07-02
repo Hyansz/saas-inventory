@@ -14,13 +14,7 @@ use App\Http\Controllers\Api\SearchController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/analytics', [AnalyticsController::class, 'index']);
 
-Route::get('/tes', function () {
-    return response()->json([
-        'project' => base_path(),
-    ]);
-});
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -50,6 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/items', [ItemController::class, 'index']);
 
     Route::get('/items/{item}', [ItemController::class, 'show']);
+
+    Route::get('/analytics', [AnalyticsController::class, 'index']);
 
     /*
     |--------------------------------------------------------------------------
