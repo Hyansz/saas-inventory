@@ -1,6 +1,6 @@
 FROM php:8.3-fpm
 
-# Install system packages
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     nginx \
     git \
@@ -17,7 +17,15 @@ RUN apt-get update && apt-get install -y \
         gd \
         pdo_pgsql \
         zip \
-        opcache
+        opcache \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Enable OPcache
+RUN echo "opcache.enable=1" > /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.validate_timestamps=0" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.memory_consumption=128" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.max_accelerated_files=10000" >> /usr/local/etc/php/conf.d/opcache.ini
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -28,11 +36,16 @@ COPY . .
 
 RUN composer install \
     --no-dev \
+    --no-interaction \
+    --prefer-dist \
     --optimize-autoloader
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
+RUN chmod -R 775 storage bootstrap/cache
+
 COPY nginx.conf /etc/nginx/sites-enabled/default
+
 COPY start.sh /start.sh
 
 RUN chmod +x /start.sh
