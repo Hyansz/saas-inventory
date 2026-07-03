@@ -6,6 +6,12 @@ import { useEffect } from "react";
 
 import { useAuthStore } from "@/store/auth-store";
 
+// HALAMAN YANG CUMA BOLEH DIAKSES SUPER_ADMIN
+const superAdminOnlyRoutes = ["/users", "/sessions"];
+
+// HALAMAN YANG DILARANG BUAT MANAGER
+const managerForbiddenRoutes = ["/categories", "/stock-ins", "/stock-outs"];
+
 export default function ProtectedRoute({
     children,
 }: {
@@ -27,16 +33,22 @@ export default function ProtectedRoute({
             return;
         }
 
-        if (user.role === "manager") {
-            const forbiddenRoutes = [
-                "/categories",
-                "/stock-ins",
-                "/stock-outs",
-            ];
+        // GUARD: HALAMAN KHUSUS SUPER_ADMIN
+        if (
+            superAdminOnlyRoutes.includes(pathname) &&
+            user.role !== "super_admin"
+        ) {
+            router.replace("/dashboard");
+            return;
+        }
 
-            if (forbiddenRoutes.includes(pathname)) {
-                router.replace("/dashboard");
-            }
+        // GUARD: HALAMAN YANG DILARANG BUAT MANAGER
+        if (
+            user.role === "manager" &&
+            managerForbiddenRoutes.includes(pathname)
+        ) {
+            router.replace("/dashboard");
+            return;
         }
     }, [pathname, router, user, hydrated]);
 

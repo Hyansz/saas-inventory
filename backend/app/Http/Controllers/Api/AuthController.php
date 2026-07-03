@@ -12,19 +12,25 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'username' => ['required', 'string'],
             'password' => ['required'],
         ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::where('username', $credentials['username'])->first();
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return response()->json([
-                'message' => 'Email atau password salah',
+                'message' => 'Username atau password salah',
             ], 401);
         }
 
-        $user->tokens()->delete();
+        // CEK APAKAH USER MASIH PUNYA SESI AKTIF DI DEVICE LAIN
+        if ($user->tokens()->exists()) {
+            return response()->json([
+                'message' => 'Akun ini sedang digunakan di perangkat lain. Hubungi admin untuk logout paksa.',
+                'code' => 'ACCOUNT_IN_USE',
+            ], 409);
+        }
 
         $token = $user->createToken('auth-token')->plainTextToken;
 

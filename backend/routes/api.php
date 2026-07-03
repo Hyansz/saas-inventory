@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\SessionController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -47,11 +49,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN ONLY
+    | ADMIN + SUPER ADMIN
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware('role:admin,super_admin')->group(function () {
 
         Route::post('/items', [ItemController::class, 'store']);
 
@@ -76,4 +78,19 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::get('/search', [SearchController::class, 'index']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | SUPER ADMIN ONLY
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware('role:super_admin')->prefix('admin')->group(function () {
+
+        Route::apiResource('users', UserController::class)->except(['show']);
+
+        Route::get('/active-sessions', [SessionController::class, 'index']);
+
+        Route::post('/force-logout/{user}', [SessionController::class, 'forceLogout']);
+    });
 });

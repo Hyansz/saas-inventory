@@ -12,10 +12,19 @@ class UserSeeder extends Seeder
     {
         User::updateOrCreate(
             [
-                'email' => 'admin@gmail.com',
-            ],
+                'name' => 'Super Admin',
+                'username' => 'superadmin',
+                'email' => 'superadmin@gmail.com',
+                'password' => Hash::make('bismillah123'),
+                'role' => 'super_admin',
+            ]
+        );
+
+        User::updateOrCreate(
             [
                 'name' => 'Admin',
+                'username' => 'admin',
+                'email' => 'admin@gmail.com',
                 'password' => Hash::make('password'),
                 'role' => 'admin',
             ]
@@ -23,10 +32,9 @@ class UserSeeder extends Seeder
 
         User::updateOrCreate(
             [
-                'email' => 'manager@gmail.com',
-            ],
-            [
                 'name' => 'Manager',
+                'username' => 'manager',
+                'email' => 'manager@gmail.com',
                 'password' => Hash::make('bismillah123'),
                 'role' => 'manager',
             ]

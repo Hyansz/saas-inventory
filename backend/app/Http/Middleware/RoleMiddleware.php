@@ -10,9 +10,9 @@ class RoleMiddleware
     public function handle(
         Request $request,
         Closure $next,
-        string $role
+        string ...$roles
     ) {
-        if ($request->user()->role !== $role) {
+        if (!in_array($request->user()->role, $roles)) {
 
             return response()->json([
                 'message' => 'Forbidden'

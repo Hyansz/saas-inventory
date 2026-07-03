@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    Mail,
-    LockKeyhole,
-    Eye,
-    EyeOff,
-    Loader2,
-} from "lucide-react";
+import { LockKeyhole, Eye, EyeOff, Loader2, User } from "lucide-react";
 import { login } from "@/services/auth";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -19,7 +13,7 @@ export default function HomePage() {
 
     const user = useAuthStore((state) => state.user);
 
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
 
     const [password, setPassword] = useState("");
 
@@ -42,7 +36,7 @@ export default function HomePage() {
             setLoading(true);
 
             const response = await login({
-                email,
+                username,
                 password,
             });
 
@@ -51,8 +45,7 @@ export default function HomePage() {
             router.replace("/dashboard");
         } catch (error: any) {
             setError(
-                error.response?.data?.message ??
-                    "Email atau password salah",
+                error.response?.data?.message ?? "Username atau password salah",
             );
         } finally {
             setLoading(false);
@@ -112,36 +105,23 @@ export default function HomePage() {
                 )}
 
                 {/* FORM */}
-                <form
-                    onSubmit={handleLogin}
-                    className="space-y-4"
-                >
-                    {/* EMAIL */}
+                <form onSubmit={handleLogin} className="space-y-4">
+                    {/* username */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                            Email
-                        </label>
+                        <label className="text-sm font-medium">Username</label>
 
                         <div className="relative">
-                            <Mail
+                            <User
                                 size={18}
-                                className="
-                                    absolute
-                                    left-4
-                                    top-1/2
-                                    -translate-y-1/2
-                                    text-zinc-400
-                                "
+                                className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
                             />
 
                             <input
-                                type="email"
-                                placeholder="you@example.com"
-                                value={email}
+                                type="text"
+                                placeholder="username"
+                                value={username}
                                 onChange={(e) => {
-                                    setEmail(e.target.value);
-
-                                    // ERROR HILANG SAAT USER NGETIK ULANG
+                                    setUsername(e.target.value);
                                     if (error) {
                                         setError("");
                                     }
@@ -166,9 +146,7 @@ export default function HomePage() {
 
                     {/* PASSWORD */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                            Password
-                        </label>
+                        <label className="text-sm font-medium">Password</label>
 
                         <div className="relative">
                             <LockKeyhole
@@ -183,11 +161,7 @@ export default function HomePage() {
                             />
 
                             <input
-                                type={
-                                    showPassword
-                                        ? "text"
-                                        : "password"
-                                }
+                                type={showPassword ? "text" : "password"}
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => {
@@ -216,11 +190,7 @@ export default function HomePage() {
 
                             <button
                                 type="button"
-                                onClick={() =>
-                                    setShowPassword(
-                                        !showPassword,
-                                    )
-                                }
+                                onClick={() => setShowPassword(!showPassword)}
                                 className="
                                     absolute
                                     right-4
@@ -261,15 +231,10 @@ export default function HomePage() {
                         "
                     >
                         {loading && (
-                            <Loader2
-                                size={18}
-                                className="animate-spin"
-                            />
+                            <Loader2 size={18} className="animate-spin" />
                         )}
 
-                        {loading
-                            ? "Loading..."
-                            : "Login"}
+                        {loading ? "Loading..." : "Login"}
                     </button>
                 </form>
 
