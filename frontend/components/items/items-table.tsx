@@ -25,7 +25,7 @@ export default function ItemsTable({
             ? JSON.parse(localStorage.getItem("user") || "{}")
             : {};
 
-    const isAdmin = user.role === "admin";
+    const isAdmin = user.role === "admin" || user.role === "super_admin";
 
     /* ================= MOBILE ================= */
     return (

@@ -53,7 +53,7 @@ export default function CategoriesPage() {
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-        if (user.role !== "admin") {
+        if (user.role !== "admin" && user.role !== "super_admin") {
             router.push("/dashboard");
         }
     }, [router]);
@@ -186,10 +186,11 @@ export default function CategoriesPage() {
                             Smart Category Management
                         </div>
 
-                        <div className="flex items-center gap-3 flex-wrap">
-                            <button
-                                onClick={() => setOpen(true)}
-                                className="
+                        {isAdmin && (
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <button
+                                    onClick={() => setOpen(true)}
+                                    className="
                                     inline-flex
                                     h-12
                                     items-center
@@ -206,11 +207,12 @@ export default function CategoriesPage() {
                                     active:scale-[0.99]
                                     cursor-pointer
                                 "
-                            >
-                                <Plus size={18} />
-                                Tambah Kategori
-                            </button>
-                        </div>
+                                >
+                                    <Plus size={18} />
+                                    Tambah Kategori
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* CONTENT */}

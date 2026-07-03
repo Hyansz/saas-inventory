@@ -1,17 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { UsersRound, UserPlus, ShieldCheck, Search } from "lucide-react";
+import { Wifi, ShieldCheck, Search, LogOut, Clock } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { getUsers, deleteUser, type ManagedUser } from "@/services/users";
+import {
+    getActiveSessions,
+    forceLogout,
+    type ActiveSession,
+} from "@/services/sessions";
 
-import AddUserModal from "@/components/users/add-user-modal";
-import EditUserModal from "@/components/users/edit-user-modal";
 import TablePagination from "@/components/ui/table-paginaton";
-import TableAction from "@/components/ui/table-action";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -27,27 +28,25 @@ const roleBadge: Record<string, string> = {
     manager: "bg-zinc-500/15 text-zinc-500 border-zinc-500/80",
 };
 
-export default function UsersPage() {
-    const [open, setOpen] = useState(false);
-    const [editOpen, setEditOpen] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<ManagedUser | null>(null);
+export default function SessionsPage() {
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
+    const [processingId, setProcessingId] = useState<number | null>(null);
 
     const queryClient = useQueryClient();
 
     const { data = [], isLoading } = useQuery({
-        queryKey: ["users"],
+        queryKey: ["active-sessions"],
 
         queryFn: async () => {
-            return await getUsers();
+            return await getActiveSessions();
         },
 
-        staleTime: 1000 * 60 * 5,
+        staleTime: 1000 * 30,
     });
 
     const filteredData = useMemo(() => {
-        return data.filter((item: ManagedUser) => {
+        return data.filter((item: ActiveSession) => {
             const keyword = search.toLowerCase();
 
             return (
@@ -66,31 +65,45 @@ export default function UsersPage() {
         return filteredData.slice(start, start + ITEMS_PER_PAGE);
     }, [filteredData, page]);
 
+    const today = new Date().toISOString().split("T")[0];
+
+    const loginToday = data.filter((item: ActiveSession) => {
+        if (!item.logged_in_at) return false;
+
+        const date = new Date(item.logged_in_at).toISOString().split("T")[0];
+
+        return date === today;
+    }).length;
+
     const totalSuperAdmin = data.filter(
-        (u: ManagedUser) => u.role === "super_admin",
+        (u: ActiveSession) => u.role === "super_admin",
     ).length;
 
-    const totalAdmin = data.filter(
-        (u: ManagedUser) => u.role === "admin",
+    const totalStaff = data.filter(
+        (u: ActiveSession) => u.role !== "super_admin",
     ).length;
 
-    const totalManager = data.filter(
-        (u: ManagedUser) => u.role === "manager",
-    ).length;
+    const handleForceLogout = async (session: ActiveSession) => {
+        const confirmed = confirm(
+            `Logout paksa akun "${session.name}"? User tersebut akan langsung ter-logout dari device-nya.`,
+        );
 
-    const handleDelete = async (item: ManagedUser) => {
-        if (!confirm(`Hapus user "${item.name}"?`)) return;
+        if (!confirmed) return;
 
         try {
-            await deleteUser(item.id);
+            setProcessingId(session.id);
 
-            toast.success("User berhasil dihapus");
+            await forceLogout(session.id);
 
-            queryClient.invalidateQueries({ queryKey: ["users"] });
+            toast.success(`Berhasil logout paksa akun ${session.name}`);
+
+            queryClient.invalidateQueries({ queryKey: ["active-sessions"] });
         } catch (error: any) {
             toast.error(
-                error.response?.data?.message ?? "Gagal menghapus user",
+                error.response?.data?.message ?? "Gagal logout paksa akun ini",
             );
+        } finally {
+            setProcessingId(null);
         }
     };
 
@@ -131,7 +144,7 @@ export default function UsersPage() {
 
                 <div className="absolute -top-28 right-0 h-80 w-80 rounded-full bg-white/[0.04] blur-3xl" />
 
-                <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-purple-500/10 blur-3xl" />
+                <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
 
                 <div className="relative z-10">
                     {/* TOP */}
@@ -152,33 +165,9 @@ export default function UsersPage() {
                                 backdrop-blur-xl
                             "
                         >
-                            <UsersRound size={14} />
-                            Access Control
+                            <Wifi size={14} />
+                            Live Monitoring
                         </div>
-
-                        <button
-                            onClick={() => setOpen(true)}
-                            className="
-                                inline-flex
-                                h-12
-                                items-center
-                                justify-center
-                                gap-2
-                                rounded-2xl
-                                bg-white
-                                px-5
-                                text-sm
-                                font-semibold
-                                text-black
-                                transition-all
-                                hover:scale-[1.02]
-                                active:scale-[0.99]
-                                cursor-pointer
-                            "
-                        >
-                            <UserPlus size={18} />
-                            Tambah User
-                        </button>
                     </div>
 
                     {/* CONTENT */}
@@ -193,7 +182,7 @@ export default function UsersPage() {
                                     leading-none
                                 "
                             >
-                                User Management
+                                Sesi Aktif
                             </h1>
 
                             <p
@@ -206,9 +195,9 @@ export default function UsersPage() {
                                     text-zinc-300
                                 "
                             >
-                                Kelola akun, role, dan hak akses seluruh
-                                pengguna sistem inventory secara terpusat dan
-                                aman.
+                                Pantau seluruh akun yang sedang online dan
+                                logout paksa perangkat yang stuck atau tidak
+                                dikenali secara realtime.
                             </p>
                         </div>
                     </div>
@@ -216,28 +205,28 @@ export default function UsersPage() {
                     {/* STATS */}
                     <div className="mt-10 grid grid-cols-2 xl:grid-cols-4 gap-4">
                         <StatCard
-                            title="Total User"
+                            title="Total Sesi Aktif"
                             value={data.length}
-                            icon={<UsersRound size={18} />}
-                        />
-
-                        <StatCard
-                            title="Super Admin"
-                            value={totalSuperAdmin}
-                            icon={<ShieldCheck size={18} />}
+                            icon={<Wifi size={18} />}
                             positive
                         />
 
                         <StatCard
-                            title="Admin"
-                            value={totalAdmin}
+                            title="Login Hari Ini"
+                            value={loginToday}
+                            icon={<Clock size={18} />}
+                        />
+
+                        <StatCard
+                            title="Super Admin Online"
+                            value={totalSuperAdmin}
                             icon={<ShieldCheck size={18} />}
                         />
 
                         <StatCard
-                            title="Manager"
-                            value={totalManager}
-                            icon={<UsersRound size={18} />}
+                            title="Staff Online"
+                            value={totalStaff}
+                            icon={<Wifi size={18} />}
                         />
                     </div>
                 </div>
@@ -317,8 +306,8 @@ export default function UsersPage() {
                             >
                                 <th className="px-6 py-4">Nama</th>
                                 <th className="px-6 py-4">Username</th>
-                                <th className="px-6 py-4">Email</th>
                                 <th className="px-6 py-4">Role</th>
+                                <th className="px-6 py-4">Login Sejak</th>
                                 <th className="px-6 py-4 text-right">Aksi</th>
                             </tr>
                         </thead>
@@ -330,83 +319,134 @@ export default function UsersPage() {
                                         colSpan={5}
                                         className="px-6 py-10 text-center text-zinc-500"
                                     >
-                                        Tidak ada user ditemukan.
+                                        Tidak ada sesi aktif saat ini.
                                     </td>
                                 </tr>
                             ) : (
-                                paginatedData.map((user: ManagedUser) => (
+                                paginatedData.map((session: ActiveSession) => (
                                     <tr
-                                        key={user.id}
+                                        key={session.id}
                                         className="hover:bg-zinc-50/50 transition"
                                     >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div
                                                     className="
-                                                        flex
-                                                        h-10
-                                                        w-10
-                                                        items-center
-                                                        justify-center
-                                                        rounded-xl
-                                                        bg-black
-                                                        text-xs
-                                                        font-semibold
-                                                        uppercase
-                                                        text-white
-                                                        flex-shrink-0
-                                                    "
+                                                            relative
+                                                            flex
+                                                            h-10
+                                                            w-10
+                                                            items-center
+                                                            justify-center
+                                                            rounded-xl
+                                                            bg-black
+                                                            text-xs
+                                                            font-semibold
+                                                            uppercase
+                                                            text-white
+                                                            flex-shrink-0
+                                                        "
                                                 >
-                                                    {user.name.charAt(0)}
+                                                    {session.name.charAt(0)}
+
+                                                    <span
+                                                        className="
+                                                                absolute
+                                                                -bottom-0.5
+                                                                -right-0.5
+                                                                h-3
+                                                                w-3
+                                                                rounded-full
+                                                                bg-emerald-500
+                                                                border-2
+                                                                border-white
+                                                            "
+                                                    />
                                                 </div>
 
                                                 <span className="font-medium">
-                                                    {user.name}
+                                                    {session.name}
                                                 </span>
                                             </div>
                                         </td>
 
                                         <td className="px-6 py-4 text-zinc-600">
-                                            {user.username}
-                                        </td>
-
-                                        <td className="px-6 py-4 text-zinc-600">
-                                            {user.email || "-"}
+                                            {session.username}
                                         </td>
 
                                         <td className="px-6 py-4">
                                             <span
                                                 className={`
-                                                    inline-flex
-                                                    items-center
-                                                    rounded-full
-                                                    border
-                                                    px-3
-                                                    py-1
-                                                    text-xs
-                                                    font-medium
-                                                    ${
-                                                        roleBadge[user.role] ??
-                                                        "bg-zinc-100 text-zinc-600 border-zinc-200"
-                                                    }
-                                                `}
+                                                        inline-flex
+                                                        items-center
+                                                        rounded-full
+                                                        border
+                                                        px-3
+                                                        py-1
+                                                        text-xs
+                                                        font-medium
+                                                        ${
+                                                            roleBadge[
+                                                                session.role
+                                                            ] ??
+                                                            "bg-zinc-100 text-zinc-600 border-zinc-200"
+                                                        }
+                                                    `}
                                             >
-                                                {roleLabel[user.role] ??
-                                                    user.role}
+                                                {roleLabel[session.role] ??
+                                                    session.role}
                                             </span>
+                                        </td>
+
+                                        <td className="px-6 py-4 text-zinc-500">
+                                            {session.logged_in_at
+                                                ? new Date(
+                                                      session.logged_in_at,
+                                                  ).toLocaleString("id-ID", {
+                                                      day: "2-digit",
+                                                      month: "short",
+                                                      hour: "2-digit",
+                                                      minute: "2-digit",
+                                                  })
+                                                : "-"}
                                         </td>
 
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end">
-                                                <TableAction
-                                                    onEdit={() => {
-                                                        setSelectedItem(user);
-                                                        setEditOpen(true);
-                                                    }}
-                                                    onDelete={() =>
-                                                        handleDelete(user)
+                                                <button
+                                                    onClick={() =>
+                                                        handleForceLogout(
+                                                            session,
+                                                        )
                                                     }
-                                                />
+                                                    disabled={
+                                                        processingId ===
+                                                        session.id
+                                                    }
+                                                    className="
+                                                            flex
+                                                            items-center
+                                                            gap-2
+                                                            rounded-xl
+                                                            border
+                                                            border-red-200
+                                                            bg-red-50
+                                                            px-3
+                                                            py-2
+                                                            text-xs
+                                                            font-medium
+                                                            text-red-600
+                                                            transition
+                                                            hover:bg-red-100
+                                                            disabled:opacity-50
+                                                            cursor-pointer
+                                                        "
+                                                >
+                                                    <LogOut size={13} />
+                                                    {processingId === session.id
+                                                        ? "Memproses..."
+                                                        : "Logout Paksa"}
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -422,24 +462,6 @@ export default function UsersPage() {
                 page={page}
                 totalPages={totalPages}
                 setPage={setPage}
-            />
-
-            {/* MODAL */}
-            <AddUserModal
-                open={open}
-                onClose={() => setOpen(false)}
-                onSuccess={() =>
-                    queryClient.invalidateQueries({ queryKey: ["users"] })
-                }
-            />
-
-            <EditUserModal
-                open={editOpen}
-                onClose={() => setEditOpen(false)}
-                item={selectedItem}
-                onSuccess={() =>
-                    queryClient.invalidateQueries({ queryKey: ["users"] })
-                }
             />
         </div>
     );

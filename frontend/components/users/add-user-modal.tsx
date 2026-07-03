@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import {
     Dialog,
     DialogContent,
@@ -9,7 +7,9 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 
-import { UserPlus } from "lucide-react";
+import { useState } from "react";
+
+import { ChevronDown, UserPlus2 } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -22,26 +22,34 @@ interface Props {
 }
 
 export default function AddUserModal({ open, onClose, onSuccess }: Props) {
-    const [name, setName] = useState("");
-    const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [role, setRole] = useState("manager");
+    const [form, setForm] = useState({
+        name: "",
+        username: "",
+        email: "",
+        password: "",
+        role: "manager",
+    });
 
     const [loading, setLoading] = useState(false);
 
     const resetForm = () => {
-        setName("");
-        setUsername("");
-        setEmail("");
-        setPassword("");
-        setRole("manager");
+        setForm({
+            name: "",
+            username: "",
+            email: "",
+            password: "",
+            role: "manager",
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!name.trim() || !username.trim() || !password.trim()) {
+        if (
+            !form.name.trim() ||
+            !form.username.trim() ||
+            !form.password.trim()
+        ) {
             toast.error("Nama, username, dan password wajib diisi");
 
             return;
@@ -51,23 +59,25 @@ export default function AddUserModal({ open, onClose, onSuccess }: Props) {
             setLoading(true);
 
             await createUser({
-                name,
-                username,
-                email: email.trim() || undefined,
-                password,
-                role,
+                name: form.name,
+                username: form.username,
+                email: form.email.trim() || undefined,
+                password: form.password,
+                role: form.role,
             });
 
             toast.success("User berhasil ditambahkan");
 
-            resetForm();
-
             onSuccess();
 
             onClose();
-        } catch (error: any) {
+
+            resetForm();
+        } catch (err: any) {
+            console.log(err);
+
             toast.error(
-                error.response?.data?.message ?? "Gagal menambahkan user",
+                err.response?.data?.message ?? "Gagal menambahkan user",
             );
         } finally {
             setLoading(false);
@@ -80,7 +90,7 @@ export default function AddUserModal({ open, onClose, onSuccess }: Props) {
                 className="
                     w-[95vw]
                     max-w-md
-                    rounded-[28px]
+                    rounded-[1rem]
                     border
                     border-zinc-200
                     p-0
@@ -112,7 +122,10 @@ export default function AddUserModal({ open, onClose, onSuccess }: Props) {
                                     justify-center
                                 "
                             >
-                                <UserPlus size={20} className="text-zinc-700" />
+                                <UserPlus2
+                                    size={20}
+                                    className="text-zinc-700"
+                                />
                             </div>
 
                             <div>
@@ -139,111 +152,183 @@ export default function AddUserModal({ open, onClose, onSuccess }: Props) {
                 <form
                     onSubmit={handleSubmit}
                     className="
+                        space-y-5
                         px-5
                         sm:px-6
                         py-5
                         sm:py-6
-                        space-y-4
-                        max-h-[70vh]
-                        overflow-y-auto
                     "
                 >
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-700">
-                            Nama Lengkap
-                        </label>
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* NAMA */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-700">
+                                Nama Lengkap
+                            </label>
 
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Contoh: Budi Santoso"
-                            className="
-                                w-full
-                                h-12
-                                mt-2
-                                rounded-2xl
-                                border
-                                border-zinc-200
-                                bg-zinc-50
-                                px-4
-                                text-sm
-                                transition-all
-                                focus:outline-none
-                                focus:ring-4
-                                focus:ring-zinc-200
-                                focus:bg-white
-                            "
-                        />
+                            <input
+                                type="text"
+                                placeholder="Budi Santoso"
+                                value={form.name}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        name: e.target.value,
+                                    })
+                                }
+                                className="
+                                    w-full
+                                    h-12
+                                    mt-2
+                                    rounded-2xl
+                                    border
+                                    border-zinc-200
+                                    bg-zinc-50
+                                    px-4
+                                    text-sm
+                                    transition-all
+                                    focus:outline-none
+                                    focus:ring-4
+                                    focus:ring-zinc-200
+                                    focus:bg-white
+                                "
+                            />
+                        </div>
+
+                        {/* USERNAME */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-700">
+                                Username
+                            </label>
+
+                            <input
+                                type="text"
+                                placeholder="budisantoso"
+                                value={form.username}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        username: e.target.value
+                                            .toLowerCase()
+                                            .replace(/\s+/g, ""),
+                                    })
+                                }
+                                className="
+                                    w-full
+                                    h-12
+                                    mt-2
+                                    rounded-2xl
+                                    border
+                                    border-zinc-200
+                                    bg-zinc-50
+                                    px-4
+                                    text-sm
+                                    transition-all
+                                    focus:outline-none
+                                    focus:ring-4
+                                    focus:ring-zinc-200
+                                    focus:bg-white
+                                "
+                            />
+                        </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-700">
-                            Username
-                        </label>
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* EMAIL */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-700">
+                                Email{" "}
+                                <span className="text-zinc-400 font-normal">
+                                    (opsional)
+                                </span>
+                            </label>
 
-                        <input
-                            type="text"
-                            value={username}
-                            onChange={(e) =>
-                                setUsername(
-                                    e.target.value
-                                        .toLowerCase()
-                                        .replace(/\s+/g, ""),
-                                )
-                            }
-                            placeholder="contoh: budisantoso"
-                            className="
-                                w-full
-                                h-12
-                                mt-2
-                                rounded-2xl
-                                border
-                                border-zinc-200
-                                bg-zinc-50
-                                px-4
-                                text-sm
-                                transition-all
-                                focus:outline-none
-                                focus:ring-4
-                                focus:ring-zinc-200
-                                focus:bg-white
-                            "
-                        />
+                            <input
+                                type="email"
+                                placeholder="user@mail.com"
+                                value={form.email}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        email: e.target.value,
+                                    })
+                                }
+                                className="
+                                    w-full
+                                    h-12
+                                    mt-2
+                                    rounded-2xl
+                                    border
+                                    border-zinc-200
+                                    bg-zinc-50
+                                    px-4
+                                    text-sm
+                                    transition-all
+                                    focus:outline-none
+                                    focus:ring-4
+                                    focus:ring-zinc-200
+                                    focus:bg-white
+                                "
+                            />
+                        </div>
+
+                        {/* ROLE */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-700">
+                                Role
+                            </label>
+
+                            <div className="relative mt-2">
+                                <select
+                                    value={form.role}
+                                    onChange={(e) =>
+                                        setForm({
+                                            ...form,
+                                            role: e.target.value,
+                                        })
+                                    }
+                                    className="
+                                        w-full
+                                        h-12
+                                        rounded-2xl
+                                        border
+                                        border-zinc-200
+                                        bg-zinc-50
+                                        px-4
+                                        pr-12
+                                        text-sm
+                                        appearance-none
+                                        transition-all
+                                        focus:outline-none
+                                        focus:ring-4
+                                        focus:ring-zinc-200
+                                        focus:bg-white
+                                        cursor-pointer
+                                    "
+                                >
+                                    <option value="manager">Manager</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="super_admin">
+                                        Super Admin
+                                    </option>
+                                </select>
+
+                                <ChevronDown
+                                    size={18}
+                                    className="
+                                        pointer-events-none
+                                        absolute
+                                        right-4
+                                        top-1/2
+                                        -translate-y-1/2
+                                        text-zinc-400
+                                    "
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-700">
-                            Email{" "}
-                            <span className="text-zinc-400 font-normal">
-                                (opsional)
-                            </span>
-                        </label>
-
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="user@example.com"
-                            className="
-                                w-full
-                                h-12
-                                mt-2
-                                rounded-2xl
-                                border
-                                border-zinc-200
-                                bg-zinc-50
-                                px-4
-                                text-sm
-                                transition-all
-                                focus:outline-none
-                                focus:ring-4
-                                focus:ring-zinc-200
-                                focus:bg-white
-                            "
-                        />
-                    </div>
-
+                    {/* PASSWORD */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-zinc-700">
                             Password
@@ -251,9 +336,14 @@ export default function AddUserModal({ open, onClose, onSuccess }: Props) {
 
                         <input
                             type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="Minimal 8 karakter"
+                            value={form.password}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    password: e.target.value,
+                                })
+                            }
                             className="
                                 w-full
                                 h-12
@@ -273,58 +363,30 @@ export default function AddUserModal({ open, onClose, onSuccess }: Props) {
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-700">
-                            Role
-                        </label>
-
-                        <select
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
+                    {/* BUTTON */}
+                    <div className="pt-2">
+                        <button
+                            type="submit"
+                            disabled={loading}
                             className="
                                 w-full
                                 h-12
-                                mt-2
                                 rounded-2xl
-                                border
-                                border-zinc-200
-                                bg-zinc-50
-                                px-4
+                                bg-black
+                                text-white
                                 text-sm
+                                font-medium
                                 transition-all
-                                focus:outline-none
-                                focus:ring-4
-                                focus:ring-zinc-200
-                                focus:bg-white
+                                hover:opacity-90
+                                active:scale-[0.99]
+                                disabled:opacity-50
+                                disabled:cursor-not-allowed
+                                cursor-pointer
                             "
                         >
-                            <option value="manager">Manager</option>
-                            <option value="admin">Admin</option>
-                            <option value="super_admin">Super Admin</option>
-                        </select>
+                            {loading ? "Menyimpan..." : "Simpan User"}
+                        </button>
                     </div>
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="
-                            w-full
-                            h-12
-                            rounded-2xl
-                            bg-black
-                            text-white
-                            text-sm
-                            font-medium
-                            transition-all
-                            hover:opacity-90
-                            active:scale-[0.99]
-                            disabled:opacity-50
-                            disabled:cursor-not-allowed
-                            cursor-pointer
-                        "
-                    >
-                        {loading ? "Menyimpan..." : "Simpan User"}
-                    </button>
                 </form>
             </DialogContent>
         </Dialog>
