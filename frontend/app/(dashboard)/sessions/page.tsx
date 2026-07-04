@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Wifi, ShieldCheck, Search, LogOut, Clock } from "lucide-react";
+import { Wifi, ShieldCheck, Search, Clock } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -13,20 +13,9 @@ import {
 } from "@/services/sessions";
 
 import TablePagination from "@/components/ui/table-paginaton";
+import SessionsTable from "@/components/sessions/sessions-table";
 
 const ITEMS_PER_PAGE = 10;
-
-const roleLabel: Record<string, string> = {
-    super_admin: "Super Admin",
-    admin: "Admin",
-    manager: "Manager",
-};
-
-const roleBadge: Record<string, string> = {
-    super_admin: "bg-purple-500/15 text-purple-500 border-purple-500/80",
-    admin: "bg-blue-500/15 text-blue-500 border-blue-500/80",
-    manager: "bg-zinc-500/15 text-zinc-500 border-zinc-500/80",
-};
 
 export default function SessionsPage() {
     const [search, setSearch] = useState("");
@@ -279,183 +268,12 @@ export default function SessionsPage() {
                 </div>
             </div>
 
-            {/* TABLE */}
-            <div
-                className="
-                    rounded-[28px]
-                    border
-                    border-zinc-200
-                    bg-white
-                    overflow-hidden
-                "
-            >
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr
-                                className="
-                                    border-b
-                                    border-zinc-100
-                                    text-left
-                                    text-xs
-                                    font-semibold
-                                    uppercase
-                                    tracking-wider
-                                    text-zinc-400
-                                "
-                            >
-                                <th className="px-6 py-4">Nama</th>
-                                <th className="px-6 py-4">Username</th>
-                                <th className="px-6 py-4">Role</th>
-                                <th className="px-6 py-4">Login Sejak</th>
-                                <th className="px-6 py-4 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-
-                        <tbody className="divide-y divide-zinc-100">
-                            {paginatedData.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="px-6 py-10 text-center text-zinc-500"
-                                    >
-                                        Tidak ada sesi aktif saat ini.
-                                    </td>
-                                </tr>
-                            ) : (
-                                paginatedData.map((session: ActiveSession) => (
-                                    <tr
-                                        key={session.id}
-                                        className="hover:bg-zinc-50/50 transition"
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div
-                                                    className="
-                                                            relative
-                                                            flex
-                                                            h-10
-                                                            w-10
-                                                            items-center
-                                                            justify-center
-                                                            rounded-xl
-                                                            bg-black
-                                                            text-xs
-                                                            font-semibold
-                                                            uppercase
-                                                            text-white
-                                                            flex-shrink-0
-                                                        "
-                                                >
-                                                    {session.name.charAt(0)}
-
-                                                    <span
-                                                        className="
-                                                                absolute
-                                                                -bottom-0.5
-                                                                -right-0.5
-                                                                h-3
-                                                                w-3
-                                                                rounded-full
-                                                                bg-emerald-500
-                                                                border-2
-                                                                border-white
-                                                            "
-                                                    />
-                                                </div>
-
-                                                <span className="font-medium">
-                                                    {session.name}
-                                                </span>
-                                            </div>
-                                        </td>
-
-                                        <td className="px-6 py-4 text-zinc-600">
-                                            {session.username}
-                                        </td>
-
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`
-                                                        inline-flex
-                                                        items-center
-                                                        rounded-full
-                                                        border
-                                                        px-3
-                                                        py-1
-                                                        text-xs
-                                                        font-medium
-                                                        ${
-                                                            roleBadge[
-                                                                session.role
-                                                            ] ??
-                                                            "bg-zinc-100 text-zinc-600 border-zinc-200"
-                                                        }
-                                                    `}
-                                            >
-                                                {roleLabel[session.role] ??
-                                                    session.role}
-                                            </span>
-                                        </td>
-
-                                        <td className="px-6 py-4 text-zinc-500">
-                                            {session.logged_in_at
-                                                ? new Date(
-                                                      session.logged_in_at,
-                                                  ).toLocaleString("id-ID", {
-                                                      day: "2-digit",
-                                                      month: "short",
-                                                      hour: "2-digit",
-                                                      minute: "2-digit",
-                                                  })
-                                                : "-"}
-                                        </td>
-
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end">
-                                                <button
-                                                    onClick={() =>
-                                                        handleForceLogout(
-                                                            session,
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        processingId ===
-                                                        session.id
-                                                    }
-                                                    className="
-                                                            flex
-                                                            items-center
-                                                            gap-2
-                                                            rounded-xl
-                                                            border
-                                                            border-red-200
-                                                            bg-red-50
-                                                            px-3
-                                                            py-2
-                                                            text-xs
-                                                            font-medium
-                                                            text-red-600
-                                                            transition
-                                                            hover:bg-red-100
-                                                            disabled:opacity-50
-                                                            cursor-pointer
-                                                        "
-                                                >
-                                                    <LogOut size={13} />
-                                                    {processingId === session.id
-                                                        ? "Memproses..."
-                                                        : "Logout Paksa"}
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {/* TABLE / CARDS */}
+            <SessionsTable
+                data={paginatedData}
+                processingId={processingId}
+                onForceLogout={handleForceLogout}
+            />
 
             {/* PAGINATION */}
             <TablePagination

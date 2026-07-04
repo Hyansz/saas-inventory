@@ -1,13 +1,6 @@
 "use client";
 
-import {
-    ArrowDownLeft,
-    Pencil,
-    Trash2,
-    Calendar,
-    MapPin,
-    ArrowUpRight,
-} from "lucide-react";
+import { Calendar, MapPin, ArrowUpRight } from "lucide-react";
 
 import DataTable from "@/components/ui/data-table";
 import TableEmpty from "@/components/ui/table-empty";
@@ -102,6 +95,7 @@ export default function StockInsTable({
             </div>
             <div className="hidden md:block">
                 <DataTable
+                    isEmpty={items.length === 0}
                     headers={[
                         { label: "Barang" },
                         { label: "Tujuan" },

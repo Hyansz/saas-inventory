@@ -17,6 +17,8 @@ import { getStockOuts, deleteStockOut } from "@/services/stock-out";
 import AddStockOutModal from "@/components/stock-out/add-stock-out-modal";
 import EditStockOutModal from "@/components/stock-out/edit-stock-out-modal";
 import StockOutsTable from "@/components/stock-out/stock-outs-table";
+import TableSearch from "@/components/ui/table-search";
+import TablePagination from "@/components/ui/table-paginaton";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -283,38 +285,14 @@ export default function StockOutPage() {
                     p-4
                 "
             >
-                <div className="relative">
-                    <Search
-                        size={18}
-                        className="
-                            absolute
-                            left-4
-                            top-1/2
-                            -translate-y-1/2
-                            text-zinc-400
-                        "
-                    />
-
-                    <input
-                        placeholder="Cari barang..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="
-                            w-full
-                            h-12
-                            rounded-2xl
-                            border
-                            border-zinc-200
-                            bg-zinc-50
-                            pl-11
-                            pr-4
-                            text-sm
-                            focus:outline-none
-                            focus:ring-4
-                            focus:ring-zinc-200
-                        "
-                    />
-                </div>
+                <TableSearch
+                    value={search}
+                    onChange={(value) => {
+                        setSearch(value);
+                        setPage(1);
+                    }}
+                    placeholder="Cari nama barang..."
+                />
             </div>
 
             {/* TABLE */}
@@ -333,62 +311,11 @@ export default function StockOutPage() {
             />
 
             {/* PAGINATION */}
-            <div
-                className="
-                    flex
-                    items-center
-                    justify-between
-                    rounded-[28px]
-                    border
-                    border-zinc-200
-                    bg-white
-                    p-4
-                "
-            >
-                <p className="text-sm text-zinc-500">
-                    Page {page} dari {totalPages || 1}
-                </p>
-
-                <div className="flex gap-3">
-                    <button
-                        disabled={page === 1}
-                        onClick={() => setPage(page - 1)}
-                        className="
-                            h-11
-                            px-4
-                            rounded-2xl
-                            border
-                            border-zinc-200
-                            flex
-                            items-center
-                            gap-2
-                            disabled:opacity-40
-                        "
-                    >
-                        <ChevronLeft size={16} />
-                        Prev
-                    </button>
-
-                    <button
-                        disabled={page >= totalPages}
-                        onClick={() => setPage(page + 1)}
-                        className="
-                            h-11
-                            px-4
-                            rounded-2xl
-                            bg-black
-                            text-white
-                            flex
-                            items-center
-                            gap-2
-                            disabled:opacity-40
-                        "
-                    >
-                        Next
-                        <ChevronRight size={16} />
-                    </button>
-                </div>
-            </div>
+            <TablePagination
+                page={page}
+                totalPages={totalPages}
+                setPage={setPage}
+            />
 
             {/* MODALS */}
             {isAdmin && (

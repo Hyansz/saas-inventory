@@ -8,7 +8,6 @@ import {
     ArrowDownLeft,
     Calendar,
     Truck,
-    Search,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,6 +16,7 @@ import AddStockInModal from "@/components/stock-in/add-stock-in-modal";
 import EditStockInModal from "@/components/stock-in/edit-stock-in-modal";
 import StockInsTable from "@/components/stock-in/stock-ins-table";
 import TablePagination from "@/components/ui/table-paginaton";
+import TableSearch from "@/components/ui/table-search";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -287,45 +287,21 @@ export default function StockInPage() {
             {/* SEARCH */}
             <div
                 className="
-                    rounded-[28px]
-                    border
-                    border-zinc-200
-                    bg-white
-                    p-4
-                "
+                rounded-[28px]
+                border
+                border-zinc-200
+                bg-white
+                p-4
+            "
             >
-                <div className="relative">
-                    <Search
-                        size={18}
-                        className="
-                            absolute
-                            left-4
-                            top-1/2
-                            -translate-y-1/2
-                            text-zinc-400
-                        "
-                    />
-
-                    <input
-                        placeholder="Cari barang..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="
-                            w-full
-                            h-12
-                            rounded-2xl
-                            border
-                            border-zinc-200
-                            bg-zinc-50
-                            pl-11
-                            pr-4
-                            text-sm
-                            focus:outline-none
-                            focus:ring-4
-                            focus:ring-zinc-200
-                        "
-                    />
-                </div>
+                <TableSearch
+                    value={search}
+                    onChange={(value) => {
+                        setSearch(value);
+                        setPage(1);
+                    }}
+                    placeholder="Cari nama barang..."
+                />
             </div>
 
             {/* TABLE */}

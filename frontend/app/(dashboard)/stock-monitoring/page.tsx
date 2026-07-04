@@ -16,6 +16,7 @@ import {
     ShieldCheck,
     Clock3,
     Sparkles,
+    Podium,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getItems } from "@/services/items";
@@ -744,7 +745,8 @@ export default function StockMonitoringPage() {
                         justify-center
                     "
                     >
-                        <TrendingUp size={18} />
+                        {/* <TrendingUp size={18} /> */}
+                        <Podium size={18} />
                     </div>
                 </div>
 

@@ -10,22 +10,10 @@ import { getUsers, deleteUser, type ManagedUser } from "@/services/users";
 
 import AddUserModal from "@/components/users/add-user-modal";
 import EditUserModal from "@/components/users/edit-user-modal";
+import UsersTable from "@/components/users/users-table";
 import TablePagination from "@/components/ui/table-paginaton";
-import TableAction from "@/components/ui/table-action";
 
 const ITEMS_PER_PAGE = 10;
-
-const roleLabel: Record<string, string> = {
-    super_admin: "Super Admin",
-    admin: "Admin",
-    manager: "Manager",
-};
-
-const roleBadge: Record<string, string> = {
-    super_admin: "bg-purple-500/15 text-purple-500 border-purple-500/80",
-    admin: "bg-blue-500/15 text-blue-500 border-blue-500/80",
-    manager: "bg-zinc-500/15 text-zinc-500 border-zinc-500/80",
-};
 
 export default function UsersPage() {
     const [open, setOpen] = useState(false);
@@ -290,132 +278,15 @@ export default function UsersPage() {
                 </div>
             </div>
 
-            {/* TABLE */}
-            <div
-                className="
-                    rounded-[28px]
-                    border
-                    border-zinc-200
-                    bg-white
-                    overflow-hidden
-                "
-            >
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr
-                                className="
-                                    border-b
-                                    border-zinc-100
-                                    text-left
-                                    text-xs
-                                    font-semibold
-                                    uppercase
-                                    tracking-wider
-                                    text-zinc-400
-                                "
-                            >
-                                <th className="px-6 py-4">Nama</th>
-                                <th className="px-6 py-4">Username</th>
-                                <th className="px-6 py-4">Email</th>
-                                <th className="px-6 py-4">Role</th>
-                                <th className="px-6 py-4 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-
-                        <tbody className="divide-y divide-zinc-100">
-                            {paginatedData.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={5}
-                                        className="px-6 py-10 text-center text-zinc-500"
-                                    >
-                                        Tidak ada user ditemukan.
-                                    </td>
-                                </tr>
-                            ) : (
-                                paginatedData.map((user: ManagedUser) => (
-                                    <tr
-                                        key={user.id}
-                                        className="hover:bg-zinc-50/50 transition"
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div
-                                                    className="
-                                                        flex
-                                                        h-10
-                                                        w-10
-                                                        items-center
-                                                        justify-center
-                                                        rounded-xl
-                                                        bg-black
-                                                        text-xs
-                                                        font-semibold
-                                                        uppercase
-                                                        text-white
-                                                        flex-shrink-0
-                                                    "
-                                                >
-                                                    {user.name.charAt(0)}
-                                                </div>
-
-                                                <span className="font-medium">
-                                                    {user.name}
-                                                </span>
-                                            </div>
-                                        </td>
-
-                                        <td className="px-6 py-4 text-zinc-600">
-                                            {user.username}
-                                        </td>
-
-                                        <td className="px-6 py-4 text-zinc-600">
-                                            {user.email || "-"}
-                                        </td>
-
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`
-                                                    inline-flex
-                                                    items-center
-                                                    rounded-full
-                                                    border
-                                                    px-3
-                                                    py-1
-                                                    text-xs
-                                                    font-medium
-                                                    ${
-                                                        roleBadge[user.role] ??
-                                                        "bg-zinc-100 text-zinc-600 border-zinc-200"
-                                                    }
-                                                `}
-                                            >
-                                                {roleLabel[user.role] ??
-                                                    user.role}
-                                            </span>
-                                        </td>
-
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end">
-                                                <TableAction
-                                                    onEdit={() => {
-                                                        setSelectedItem(user);
-                                                        setEditOpen(true);
-                                                    }}
-                                                    onDelete={() =>
-                                                        handleDelete(user)
-                                                    }
-                                                />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {/* TABLE / CARDS */}
+            <UsersTable
+                data={paginatedData}
+                onEdit={(user) => {
+                    setSelectedItem(user);
+                    setEditOpen(true);
+                }}
+                onDelete={handleDelete}
+            />
 
             {/* PAGINATION */}
             <TablePagination
