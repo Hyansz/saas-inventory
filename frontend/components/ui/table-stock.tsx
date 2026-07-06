@@ -47,7 +47,6 @@ export default function TableStock({
                         value={search}
                         onChange={(value) => {
                             setSearch(value);
-                            setPage?.(1);
                         }}
                         placeholder="Cari nama barang..."
                     />
