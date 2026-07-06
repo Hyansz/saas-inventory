@@ -337,7 +337,7 @@ export default function HomePage() {
                                     <div className="relative">
                                         <User
                                             size={18}
-                                            className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 z-2 text-zinc-400"
                                         />
 
                                         <input
@@ -366,7 +366,7 @@ export default function HomePage() {
                                     <div className="relative">
                                         <LockKeyhole
                                             size={18}
-                                            className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400"
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 z-2 text-zinc-400"
                                         />
 
                                         <input
