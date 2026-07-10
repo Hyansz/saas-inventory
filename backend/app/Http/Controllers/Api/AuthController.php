@@ -24,6 +24,9 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // HAPUS TOKEN YANG SUDAH EXPIRED
+        $user->tokens()->where('expires_at', '<', now())->delete();
+
         // CEK APAKAH USER MASIH PUNYA SESI AKTIF DI DEVICE LAIN
         if ($user->tokens()->exists()) {
             return response()->json([
