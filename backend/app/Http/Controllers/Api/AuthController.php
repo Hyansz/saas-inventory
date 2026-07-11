@@ -24,7 +24,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // HAPUS TOKEN YANG SUDAH EXPIRED
+        // HAPUS TOKEN YANG SUDAH EXPIRED (sekarang beneran match, karena expires_at diisi)
         $user->tokens()->where('expires_at', '<', now())->delete();
 
         // CEK APAKAH USER MASIH PUNYA SESI AKTIF DI DEVICE LAIN
@@ -35,7 +35,12 @@ class AuthController extends Controller
             ], 409);
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        // set expires_at eksplisit, selaras sama config('sanctum.expiration')
+        $token = $user->createToken(
+            'auth-token',
+            ['*'],
+            now()->addMinutes((int) config('sanctum.expiration'))
+        )->plainTextToken;
 
         return response()->json([
             'message' => 'Login berhasil',
