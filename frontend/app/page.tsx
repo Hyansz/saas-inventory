@@ -13,6 +13,7 @@ import {
     ScanBarcode,
     ShieldCheck,
     ArrowRight,
+    AlertCircle,
 } from "lucide-react";
 import { login } from "@/services/auth";
 import { useAuthStore } from "@/store/auth-store";
@@ -137,14 +138,23 @@ export default function HomePage() {
             });
 
             setAuth(response.user, response.token);
-
-            // jangan matiin loading di sini — biarkan tombol tetap "locked"
-            // sampai animasi sukses selesai dan halaman benar-benar pindah
             setSuccess(true);
         } catch (error: any) {
-            setError(
-                error.response?.data?.message ?? "Username atau password salah",
-            );
+            // hanya tampilkan pesan untuk error LOGIN (401 = kredensial salah,
+            // 409 = akun lagi dipakai device lain). Error lain (network down,
+            // 500 server error, dll) sengaja gak ditampilkan di sini.
+            const status = error.response?.status;
+
+            if (status === 401 || status === 409) {
+                setError(
+                    error.response?.data?.message ??
+                        "Username atau password salah",
+                );
+            } else {
+                setError("");
+                console.error("Login gagal (non-credential error):", error);
+            }
+
             setLoading(false);
         }
     };
@@ -320,6 +330,18 @@ export default function HomePage() {
                                     inventory.
                                 </p>
                             </div>
+
+                            {error && (
+                                <div className="mb-4 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50/80 px-4 py-2.5 backdrop-blur-sm">
+                                    <AlertCircle
+                                        size={16}
+                                        className="shrink-0 text-red-500"
+                                    />
+                                    <p className="text-sm text-red-600">
+                                        {error}
+                                    </p>
+                                </div>
+                            )}
 
                             {/* FORM */}
                             <form
@@ -574,6 +596,16 @@ export default function HomePage() {
                                 Login untuk melanjutkan ke dashboard inventory.
                             </p>
                         </div>
+
+                        {error && (
+                            <div className="mb-5 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5">
+                                <AlertCircle
+                                    size={16}
+                                    className="shrink-0 text-red-500"
+                                />
+                                <p className="text-sm text-red-600">{error}</p>
+                            </div>
+                        )}
 
                         {/* FORM */}
                         <form
