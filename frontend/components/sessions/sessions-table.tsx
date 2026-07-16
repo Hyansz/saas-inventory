@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Monitor, Smartphone, Tablet } from "lucide-react";
+import { LogOut, Monitor, Smartphone, Tablet, MapPin } from "lucide-react";
 
 import { type ActiveSession } from "@/services/sessions";
 
@@ -220,6 +220,14 @@ export default function SessionsTable({
                             <span>{session.ip_address}</span>
                         </div>
 
+                        {/* LOCATION */}
+                        {session.location && session.location !== '-' && (
+                            <div className="mt-2 flex items-center gap-1.5 text-xs text-zinc-400">
+                                <MapPin size={12} />
+                                <span>{session.location}</span>
+                            </div>
+                        )}
+
                         <div
                             className="
                                 mt-3
@@ -278,6 +286,7 @@ export default function SessionsTable({
                             >
                                 <th className="px-6 py-4">Nama</th>
                                 <th className="px-6 py-4">Perangkat</th>
+                                <th className="px-6 py-4">Lokasi</th>
                                 <th className="px-6 py-4">IP Address</th>
                                 <th className="px-6 py-4">Role</th>
                                 <th className="px-6 py-4">Login Sejak</th>
@@ -315,6 +324,13 @@ export default function SessionsTable({
                                                 {session.browser} &middot;{" "}
                                                 {session.os}
                                             </span>
+                                        </div>
+                                    </td>
+
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-1.5 text-zinc-500 text-xs">
+                                            <MapPin size={13} className="text-zinc-400" />
+                                            <span>{session.location || '-'}</span>
                                         </div>
                                     </td>
 

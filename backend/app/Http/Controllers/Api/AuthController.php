@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -32,10 +33,13 @@ class AuthController extends Controller
             now()->addMinutes((int) config('sanctum.expiration'))
         );
 
-        // Simpan info device supaya super admin bisa monitor
+        $ip = $request->ip();
+        $location = self::fetchLocation($ip);
+
         $token->accessToken->forceFill([
-            'ip_address' => $request->ip(),
+            'ip_address' => $ip,
             'user_agent' => $request->userAgent(),
+            'location' => $location,
         ])->save();
 
         return response()->json([
@@ -57,5 +61,32 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logout berhasil',
         ]);
+    }
+
+    private static function fetchLocation(string $ip): ?string
+    {
+        // Localhost tidak bisa di-geolocate
+        if (in_array($ip, ['127.0.0.1', '::1', 'localhost'])) {
+            return 'Localhost';
+        }
+
+        try {
+            $response = Http::timeout(3)
+                ->get("http://ip-api.com/json/{$ip}?fields=status,country,regionName,city");
+
+            if ($response->successful() && $response->json('status') === 'success') {
+                $parts = array_filter([
+                    $response->json('city'),
+                    $response->json('regionName'),
+                    $response->json('country'),
+                ]);
+
+                return implode(', ', $parts) ?: null;
+            }
+        } catch (\Exception $e) {
+            // Geolocation gagal, jangan block login
+        }
+
+        return null;
     }
 }

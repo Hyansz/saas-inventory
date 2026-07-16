@@ -24,6 +24,7 @@ class SessionController extends Controller
                 'users.role',
                 'personal_access_tokens.ip_address',
                 'personal_access_tokens.user_agent',
+                'personal_access_tokens.location',
                 'personal_access_tokens.created_at as logged_in_at',
                 'personal_access_tokens.last_used_at',
             )
@@ -40,6 +41,7 @@ class SessionController extends Controller
                     'email' => $row->email,
                     'role' => $row->role,
                     'ip_address' => $row->ip_address ?? '-',
+                    'location' => $row->location ?? '-',
                     'device' => $device['device'],
                     'browser' => $device['browser'],
                     'os' => $device['os'],

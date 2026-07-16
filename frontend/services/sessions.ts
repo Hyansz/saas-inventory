@@ -8,6 +8,7 @@ export interface ActiveSession {
     email: string | null;
     role: string;
     ip_address: string;
+    location: string;
     device: string;
     browser: string;
     os: string;

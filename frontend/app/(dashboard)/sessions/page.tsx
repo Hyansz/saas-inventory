@@ -76,7 +76,7 @@ export default function SessionsPage() {
         const deviceLabel = `${session.browser} (${session.os})`;
 
         const confirmed = confirm(
-            `Logout paksa sesi ${session.name} di ${deviceLabel}?\nIP: ${session.ip_address}`,
+            `Logout paksa sesi ${session.name} di ${deviceLabel}?\nIP: ${session.ip_address}\nLokasi: ${session.location || '-'}`,
         );
 
         if (!confirmed) return;
