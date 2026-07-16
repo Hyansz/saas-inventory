@@ -92,5 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/active-sessions', [SessionController::class, 'index']);
 
         Route::post('/force-logout/{user}', [SessionController::class, 'forceLogout']);
+
+        Route::delete('/force-logout-token/{tokenId}', [SessionController::class, 'forceLogoutToken']);
     });
 });

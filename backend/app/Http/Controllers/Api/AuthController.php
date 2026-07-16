@@ -24,21 +24,24 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // HAPUS SEMUA TOKEN LAMA (expired maupun belum) — 90 menit hanya safety net
-        // untuk user yang lupa logout, bukan untuk memblokir login baru.
-        $user->tokens()->delete();
-
-        // set expires_at eksplisit, selaras sama config('sanctum.expiration')
+        // MULTI-DEVICE: izinkan login dari device mana saja.
+        // Token lama otomatis expired setelah 90 menit (safety net lupa logout).
         $token = $user->createToken(
             'auth-token',
             ['*'],
             now()->addMinutes((int) config('sanctum.expiration'))
-        )->plainTextToken;
+        );
+
+        // Simpan info device supaya super admin bisa monitor
+        $token->accessToken->update([
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return response()->json([
             'message' => 'Login berhasil',
             'user' => $user,
-            'token' => $token,
+            'token' => $token->plainTextToken,
         ]);
     }
 

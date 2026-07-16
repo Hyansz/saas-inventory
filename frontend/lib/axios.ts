@@ -39,7 +39,7 @@ api.interceptors.response.use(
             if (hadToken) {
                 toast.error("Sesi Anda berakhir", {
                     description:
-                        "Akun Anda sedang digunakan / login di perangkat lain.",
+                        "Sesi telah expired atau dicabut oleh admin.",
                 });
             }
 

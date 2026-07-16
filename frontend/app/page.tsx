@@ -140,12 +140,9 @@ export default function HomePage() {
             setAuth(response.user, response.token);
             setSuccess(true);
         } catch (error: any) {
-            // hanya tampilkan pesan untuk error LOGIN (401 = kredensial salah,
-            // 409 = akun lagi dipakai device lain). Error lain (network down,
-            // 500 server error, dll) sengaja gak ditampilkan di sini.
             const status = error.response?.status;
 
-            if (status === 401 || status === 409) {
+            if (status === 401) {
                 setError(
                     error.response?.data?.message ??
                         "Username atau password salah",

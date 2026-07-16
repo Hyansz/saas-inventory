@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import {
     getActiveSessions,
-    forceLogout,
+    forceLogoutToken,
     type ActiveSession,
 } from "@/services/sessions";
 
@@ -73,23 +73,25 @@ export default function SessionsPage() {
     ).length;
 
     const handleForceLogout = async (session: ActiveSession) => {
+        const deviceLabel = `${session.browser} (${session.os})`;
+
         const confirmed = confirm(
-            `Logout paksa akun "${session.name}"? User tersebut akan langsung ter-logout dari device-nya.`,
+            `Logout paksa sesi ${session.name} di ${deviceLabel}?\nIP: ${session.ip_address}`,
         );
 
         if (!confirmed) return;
 
         try {
-            setProcessingId(session.id);
+            setProcessingId(session.token_id);
 
-            await forceLogout(session.id);
+            await forceLogoutToken(session.token_id);
 
-            toast.success(`Berhasil logout paksa akun ${session.name}`);
+            toast.success(`Sesi ${session.name} di ${deviceLabel} berhasil dilogout`);
 
             queryClient.invalidateQueries({ queryKey: ["active-sessions"] });
         } catch (error: any) {
             toast.error(
-                error.response?.data?.message ?? "Gagal logout paksa akun ini",
+                error.response?.data?.message ?? "Gagal logout sesi ini",
             );
         } finally {
             setProcessingId(null);
