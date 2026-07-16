@@ -14,6 +14,7 @@ import {
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/auth-store";
 import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
 import Sidebar from "./sidebar";
 import Notification from "./notification";
 
@@ -115,7 +116,9 @@ export default function Topbar() {
 
             await api.post("/logout");
         } catch (error) {
-            console.log(error);
+            toast.warning("Gagal menghapus sesi di server", {
+                description: "Anda tetap akan logout dari perangkat ini.",
+            });
         } finally {
             logoutStore();
 

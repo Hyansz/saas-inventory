@@ -24,16 +24,9 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // HAPUS TOKEN YANG SUDAH EXPIRED (sekarang beneran match, karena expires_at diisi)
-        $user->tokens()->where('expires_at', '<', now())->delete();
-
-        // CEK APAKAH USER MASIH PUNYA SESI AKTIF DI DEVICE LAIN
-        if ($user->tokens()->exists()) {
-            return response()->json([
-                'message' => 'Akun ini sedang digunakan di perangkat lain. Hubungi admin untuk logout paksa.',
-                'code' => 'ACCOUNT_IN_USE',
-            ], 409);
-        }
+        // HAPUS SEMUA TOKEN LAMA (expired maupun belum) — 90 menit hanya safety net
+        // untuk user yang lupa logout, bukan untuk memblokir login baru.
+        $user->tokens()->delete();
 
         // set expires_at eksplisit, selaras sama config('sanctum.expiration')
         $token = $user->createToken(
