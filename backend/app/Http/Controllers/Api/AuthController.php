@@ -33,10 +33,10 @@ class AuthController extends Controller
         );
 
         // Simpan info device supaya super admin bisa monitor
-        $token->accessToken->update([
+        $token->accessToken->forceFill([
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-        ]);
+        ])->save();
 
         return response()->json([
             'message' => 'Login berhasil',
