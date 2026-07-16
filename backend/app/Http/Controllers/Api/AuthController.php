@@ -65,13 +65,16 @@ class AuthController extends Controller
 
     private static function fetchLocation(string $ip): ?string
     {
-        // Localhost tidak bisa di-geolocate
-        if (in_array($ip, ['127.0.0.1', '::1', 'localhost'])) {
-            return 'Localhost';
+        // Localhost & IP private (Docker/network) tidak bisa di-geolocate
+        if (
+            in_array($ip, ['127.0.0.1', '::1', 'localhost'])
+            || !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)
+        ) {
+            return 'Local Network';
         }
 
         try {
-            $response = Http::timeout(3)
+            $response = Http::timeout(5)
                 ->get("http://ip-api.com/json/{$ip}?fields=status,country,regionName,city");
 
             if ($response->successful() && $response->json('status') === 'success') {

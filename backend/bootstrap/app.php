@@ -21,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+
+        // Trust reverse proxy (Nginx/Docker) supaya $request->ip()
+        // return IP client asli dari X-Forwarded-For, bukan IP proxy.
+        $middleware->trustProxies(at: '*');
     })
     
     ->withExceptions(function (Exceptions $exceptions): void {
