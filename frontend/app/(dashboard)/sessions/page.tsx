@@ -31,7 +31,7 @@ export default function SessionsPage() {
             return await getActiveSessions();
         },
 
-        staleTime: 1000 * 30,
+        refetchInterval: 3000,
     });
 
     const filteredData = useMemo(() => {
