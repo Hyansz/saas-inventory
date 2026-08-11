@@ -27,6 +27,7 @@ const routeNames: Record<string, string> = {
     reports: "Laporan",
     categories: "Kategori",
     "stock-monitoring": "Stock Monitoring",
+    "stock-opname": "Stock Opname",
 };
 
 export default function Topbar() {

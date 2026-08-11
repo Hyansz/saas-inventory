@@ -11,13 +11,25 @@ class InventoryTransaction extends Model
         'item_id',
         'type',
         'qty',
+        'unit_id',
         'tanggal',
         'keterangan',
+        'opname_item_id',
     ];
 
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(ItemUnit::class);
+    }
+
+    public function opnameItem()
+    {
+        return $this->belongsTo(StockOpnameItem::class);
     }
 
     public function stockIn(): HasOne

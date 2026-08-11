@@ -7,12 +7,13 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Save, ChevronDown, FileSliders } from "lucide-react";
 
 import { getItems } from "@/services/items";
 import { updateStockOut } from "@/services/stock-out";
+import { convertPreview, formatUnitName } from "@/lib/unit-format";
 
 interface Props {
     open: boolean;
@@ -35,6 +36,7 @@ export default function EditStockOutModal({
         item_id: "",
         tujuan: "",
         qty: "",
+        unit_id: "",
         tanggal: "",
     });
 
@@ -47,7 +49,8 @@ export default function EditStockOutModal({
             setForm({
                 item_id: item.item_id?.toString() || "",
                 tujuan: item.tujuan || "",
-                qty: item.qty?.toString() || "",
+                qty: (item.qty_unit ?? item.qty)?.toString() || "",
+                unit_id: item.unit_id?.toString() || "",
                 tanggal: item.tanggal ? item.tanggal.split("T")[0] : "",
             });
         }
@@ -66,6 +69,41 @@ export default function EditStockOutModal({
         }
     };
 
+    const selectedItem = useMemo(
+        () => items.find((i) => String(i.id) === String(form.item_id)) ?? null,
+        [items, form.item_id],
+    );
+
+    const baseName = formatUnitName(selectedItem);
+
+    const handleItemChange = (itemId: string) => {
+        const nextItem = items.find((i) => String(i.id) === String(itemId));
+
+        const baseUnit =
+            nextItem?.units?.find((u: any) => u.is_base) ??
+            nextItem?.units?.[0];
+
+        setForm({
+            ...form,
+            item_id: itemId,
+            unit_id: baseUnit ? String(baseUnit.id) : "",
+        });
+    };
+
+    const selectedUnit = useMemo(
+        () =>
+            selectedItem?.units?.find(
+                (u: any) => String(u.id) === String(form.unit_id),
+            ) ?? null,
+        [selectedItem, form.unit_id],
+    );
+
+    const preview = convertPreview(
+        Number(form.qty),
+        selectedUnit,
+        baseName,
+    );
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -74,7 +112,8 @@ export default function EditStockOutModal({
 
             await updateStockOut(item.id, {
                 item_id: Number(form.item_id),
-                qty: Number(form.qty),
+                qty_unit: Number(form.qty),
+                unit_id: Number(form.unit_id),
                 tujuan: form.tujuan,
                 tanggal: form.tanggal,
             });
@@ -128,7 +167,7 @@ export default function EditStockOutModal({
                     <div className="grid grid-cols-2 gap-4">
                         {/* BARANG */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">
+                            <label className="text-sm font-medium text-zinc-700">
                                 Barang
                             </label>
 
@@ -136,27 +175,24 @@ export default function EditStockOutModal({
                                 <select
                                     value={form.item_id}
                                     onChange={(e) =>
-                                        setForm({
-                                            ...form,
-                                            item_id: e.target.value,
-                                        })
+                                        handleItemChange(e.target.value)
                                     }
                                     className="
-                                        w-full
-                                        h-12
-                                        rounded-2xl
-                                        border
-                                        border-zinc-200
-                                        bg-zinc-50
-                                        px-4
-                                        pr-12
-                                        text-sm
-                                        appearance-none
-                                        focus:outline-none
-                                        focus:ring-4
-                                        focus:ring-zinc-200
-                                        cursor-pointer
-                                    "
+                                    w-full
+                                    h-12
+                                    rounded-2xl
+                                    border
+                                    border-zinc-200
+                                    bg-zinc-50
+                                    px-4
+                                    pr-12
+                                    text-sm
+                                    appearance-none
+                                    focus:outline-none
+                                    focus:ring-4
+                                    focus:ring-zinc-200
+                                    cursor-pointer
+                                "
                                 >
                                     <option value="">Pilih Barang</option>
 
@@ -183,13 +219,13 @@ export default function EditStockOutModal({
 
                         {/* TUJUAN */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">
+                            <label className="text-sm font-medium text-zinc-700">
                                 Tujuan
                             </label>
 
                             <input
                                 type="text"
-                                placeholder="Tujuan barang keluar"
+                                placeholder="Tujuan"
                                 value={form.tujuan}
                                 onChange={(e) =>
                                     setForm({
@@ -198,29 +234,96 @@ export default function EditStockOutModal({
                                     })
                                 }
                                 className="
+                                w-full
+                                h-12
+                                mt-2
+                                rounded-2xl
+                                border
+                                border-zinc-200
+                                bg-zinc-50
+                                px-4
+                                text-sm
+                                focus:outline-none
+                                focus:ring-4
+                                focus:ring-zinc-200
+                            "
+                            />
+                        </div>
+                    </div>
+
+                    {/* SATUAN */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-700">
+                            Satuan
+                        </label>
+
+                        <div className="relative mt-2">
+                            <select
+                                disabled={!selectedItem}
+                                value={form.unit_id}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        unit_id: e.target.value,
+                                    })
+                                }
+                                className="
                                     w-full
                                     h-12
-                                    mt-2
                                     rounded-2xl
                                     border
                                     border-zinc-200
                                     bg-zinc-50
                                     px-4
+                                    pr-12
                                     text-sm
+                                    appearance-none
                                     focus:outline-none
                                     focus:ring-4
                                     focus:ring-zinc-200
+                                    disabled:opacity-50
+                                    disabled:cursor-not-allowed
+                                    cursor-pointer
                                 "
+                            >
+                                <option value="">
+                                    {selectedItem
+                                        ? "Pilih satuan"
+                                        : "Pilih barang dulu"}
+                                </option>
+
+                                {selectedItem?.units?.map((unit: any) => (
+                                    <option key={unit.id} value={unit.id}>
+                                        {unit.nama_unit}
+                                        {unit.is_base ? " (dasar)" : ""}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <ChevronDown
+                                size={18}
+                                className="
+                                pointer-events-none
+                                absolute
+                                right-4
+                                top-1/2
+                                -translate-y-1/2
+                                text-zinc-400
+                            "
                             />
                         </div>
                     </div>
 
                     {/* QTY */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Qty</label>
+                        <label className="text-sm font-medium text-zinc-700">
+                            Qty ({selectedUnit?.nama_unit ?? "satuan"})
+                        </label>
 
                         <input
                             type="number"
+                            min="0.01"
+                            step="any"
                             placeholder="Jumlah barang"
                             value={form.qty}
                             onChange={(e) =>
@@ -244,11 +347,19 @@ export default function EditStockOutModal({
                                 focus:ring-zinc-200
                             "
                         />
+
+                        {preview && (
+                            <p className="text-xs text-zinc-500 mt-1.5">
+                                {preview}
+                            </p>
+                        )}
                     </div>
 
                     {/* TANGGAL */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Tanggal</label>
+                        <label className="text-sm font-medium text-zinc-700">
+                            Tanggal
+                        </label>
 
                         <input
                             type="date"

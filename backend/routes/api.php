@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\StockInController;
 use App\Http\Controllers\Api\StockOutController;
+use App\Http\Controllers\Api\StockOpnameController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\ReportController;
@@ -74,6 +75,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource(
             'stock-outs',
             StockOutController::class
+        );
+
+        Route::apiResource(
+            'stock-opnames',
+            StockOpnameController::class
+        )->except(['update']);
+
+        Route::post(
+            '/stock-opnames/{stockOpname}/complete',
+            [StockOpnameController::class, 'complete']
         );
     });
 

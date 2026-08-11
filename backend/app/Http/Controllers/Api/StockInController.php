@@ -19,7 +19,7 @@ class StockInController extends Controller
     public function index()
     {
         return response()->json(
-            StockIn::with(['item', 'user'])
+            StockIn::with(['item', 'user', 'unit'])
                 ->latest()
                 ->paginate(10)
         );
@@ -31,7 +31,9 @@ class StockInController extends Controller
 
         $validated = $request->validate([
             'item_id' => 'required|exists:items,id',
-            'qty' => 'required|integer|min:1',
+            'qty' => 'required_without:qty_unit|numeric|min:1',
+            'qty_unit' => 'nullable|numeric|min:0.01',
+            'unit_id' => 'nullable|integer|exists:item_units,id',
             'supplier' => 'required|string',
             'tanggal' => 'required|date',
         ]);
@@ -42,7 +44,7 @@ class StockInController extends Controller
 
         return response()->json([
             'message' => 'Barang masuk berhasil ditambahkan',
-            'data' => $stockIn->load(['item', 'user']),
+            'data' => $stockIn->load(['item', 'user', 'unit']),
         ], 201);
     }
 
@@ -59,7 +61,9 @@ class StockInController extends Controller
 
         $validated = $request->validate([
             'item_id' => 'required|exists:items,id',
-            'qty' => 'required|integer|min:1',
+            'qty' => 'required_without:qty_unit|numeric|min:1',
+            'qty_unit' => 'nullable|numeric|min:0.01',
+            'unit_id' => 'nullable|integer|exists:item_units,id',
             'supplier' => 'required|string',
             'tanggal' => 'required|date',
         ]);
@@ -71,7 +75,7 @@ class StockInController extends Controller
 
         return response()->json([
             'message' => 'Stock masuk berhasil diupdate',
-            'data' => $stockIn->load(['item', 'user']),
+            'data' => $stockIn->load(['item', 'user', 'unit']),
         ]);
     }
 

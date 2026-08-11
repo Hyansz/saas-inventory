@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\InventoryTransaction;
 use App\Models\Item;
+use App\Models\ItemUnit;
 use App\Models\StockIn;
 use App\Models\StockOut;
 use Illuminate\Support\Facades\DB;
@@ -34,23 +35,76 @@ class InventoryService
 
     /*
     |--------------------------------------------------------------------------
+    | UNIT RESOLUTION & CONVERSION
+    |--------------------------------------------------------------------------
+    */
+
+    public static function resolveUnit(Item $item, ?int $unitId = null): ItemUnit
+    {
+        if ($unitId) {
+            $unit = ItemUnit::find($unitId);
+
+            if (!$unit || $unit->item_id !== $item->id) {
+                abort(422, 'Satuan tidak terdaftar untuk barang ini');
+            }
+
+            return $unit;
+        }
+
+        $unit = $item->satuanDasar
+            ?? $item->units()->where('is_base', true)->first();
+
+        if (!$unit) {
+            abort(422, 'Barang belum memiliki satuan dasar');
+        }
+
+        return $unit;
+    }
+
+    public static function convertToBase(ItemUnit $unit, float $qtyUnit): int
+    {
+        if ($qtyUnit <= 0) {
+            abort(422, 'Jumlah harus lebih dari 0');
+        }
+
+        $qtyBase = $qtyUnit * $unit->konversi;
+
+        if (abs($qtyBase - round($qtyBase)) > 1e-6 || round($qtyBase) < 1) {
+            abort(422, "Konversi menghasilkan pecahan: {$qtyUnit} {$unit->nama_unit} = {$qtyBase} satuan dasar");
+        }
+
+        return (int) round($qtyBase);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | CREATE STOCK IN
     |--------------------------------------------------------------------------
     */
 
     public static function createStockIn(array $data): StockIn
     {
-        return DB::transaction(function () use ($data) {
+        $item = Item::findOrFail($data['item_id']);
+
+        $unit = self::resolveUnit($item, $data['unit_id'] ?? null);
+
+        $qtyBase = self::convertToBase($unit, (float) ($data['qty_unit'] ?? $data['qty']));
+
+        return DB::transaction(function () use ($data, $item, $unit, $qtyBase) {
 
             $transaction = InventoryTransaction::create([
-                'item_id' => $data['item_id'],
+                'item_id' => $item->id,
                 'type' => 'IN',
-                'qty' => $data['qty'],
+                'qty' => $qtyBase,
+                'unit_id' => $unit->id,
                 'tanggal' => $data['tanggal'],
                 'keterangan' => 'Stock Masuk',
             ]);
 
             $data['transaction_id'] = $transaction->id;
+            $data['qty'] = $qtyBase;
+            $data['unit_id'] = $unit->id;
+            $data['qty_unit'] = $data['qty_unit'] ?? $qtyBase;
 
             return StockIn::create($data);
         });
@@ -67,15 +121,26 @@ class InventoryService
         array $data
     ): StockIn {
 
-        return DB::transaction(function () use ($stockIn, $data) {
+        $item = Item::findOrFail($data['item_id']);
+
+        $unit = self::resolveUnit($item, $data['unit_id'] ?? null);
+
+        $qtyBase = self::convertToBase($unit, (float) ($data['qty_unit'] ?? $data['qty']));
+
+        return DB::transaction(function () use ($stockIn, $data, $unit, $qtyBase) {
 
             $stockIn->transaction->update([
                 'item_id' => $data['item_id'],
-                'qty' => $data['qty'],
+                'qty' => $qtyBase,
+                'unit_id' => $unit->id,
                 'tanggal' => $data['tanggal'],
                 'type' => 'IN',
                 'keterangan' => 'Stock Masuk',
             ]);
+
+            $data['qty'] = $qtyBase;
+            $data['unit_id'] = $unit->id;
+            $data['qty_unit'] = $data['qty_unit'] ?? $qtyBase;
 
             $stockIn->update($data);
 
@@ -109,21 +174,29 @@ class InventoryService
     {
         $item = Item::findOrFail($data['item_id']);
 
-        if (self::currentStock($item) < $data['qty']) {
+        $unit = self::resolveUnit($item, $data['unit_id'] ?? null);
+
+        $qtyBase = self::convertToBase($unit, (float) ($data['qty_unit'] ?? $data['qty']));
+
+        if (self::currentStock($item) < $qtyBase) {
             abort(422, 'Stok tidak mencukupi');
         }
 
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data, $item, $unit, $qtyBase) {
 
             $transaction = InventoryTransaction::create([
-                'item_id' => $data['item_id'],
+                'item_id' => $item->id,
                 'type' => 'OUT',
-                'qty' => $data['qty'],
+                'qty' => $qtyBase,
+                'unit_id' => $unit->id,
                 'tanggal' => $data['tanggal'],
                 'keterangan' => 'Stock Keluar',
             ]);
 
             $data['transaction_id'] = $transaction->id;
+            $data['qty'] = $qtyBase;
+            $data['unit_id'] = $unit->id;
+            $data['qty_unit'] = $data['qty_unit'] ?? $qtyBase;
 
             return StockOut::create($data);
         });
@@ -142,21 +215,30 @@ class InventoryService
 
         $item = Item::findOrFail($data['item_id']);
 
+        $unit = self::resolveUnit($item, $data['unit_id'] ?? null);
+
+        $qtyBase = self::convertToBase($unit, (float) ($data['qty_unit'] ?? $data['qty']));
+
         $available = self::currentStock($item) + $stockOut->qty;
 
-        if ($available < $data['qty']) {
+        if ($available < $qtyBase) {
             abort(422, 'Stok tidak mencukupi');
         }
 
-        return DB::transaction(function () use ($stockOut, $data) {
+        return DB::transaction(function () use ($stockOut, $data, $unit, $qtyBase) {
 
             $stockOut->transaction->update([
                 'item_id' => $data['item_id'],
-                'qty' => $data['qty'],
+                'qty' => $qtyBase,
+                'unit_id' => $unit->id,
                 'tanggal' => $data['tanggal'],
                 'type' => 'OUT',
                 'keterangan' => 'Stock Keluar',
             ]);
+
+            $data['qty'] = $qtyBase;
+            $data['unit_id'] = $unit->id;
+            $data['qty_unit'] = $data['qty_unit'] ?? $qtyBase;
 
             $stockOut->update($data);
 
@@ -178,5 +260,24 @@ class InventoryService
 
             $stockOut->delete();
         });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE STOCK ADJUSTMENT (STOCK OPNAME)
+    |--------------------------------------------------------------------------
+    */
+
+    public static function createStockAdjustment(array $data): InventoryTransaction
+    {
+        return InventoryTransaction::create([
+            'item_id' => $data['item_id'],
+            'type' => $data['direction'],
+            'qty' => $data['qty'],
+            'unit_id' => $data['unit_id'] ?? null,
+            'tanggal' => $data['tanggal'],
+            'keterangan' => $data['keterangan'],
+            'opname_item_id' => $data['opname_item_id'],
+        ]);
     }
 }

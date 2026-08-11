@@ -12,6 +12,7 @@ import {
     History,
     Package,
     ClipboardCheck,
+    ClipboardList,
     FolderTree,
     FileSpreadsheet,
     X,
@@ -78,6 +79,12 @@ const allMenus = [
                 href: "/stock-monitoring",
                 icon: ClipboardCheck,
                 roles: ["super_admin", "admin", "manager"],
+            },
+            {
+                name: "Stock Opname",
+                href: "/stock-opname",
+                icon: ClipboardList,
+                roles: ["super_admin", "admin"],
             },
             {
                 name: "Kategori",

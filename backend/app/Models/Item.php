@@ -13,6 +13,7 @@ class Item extends Model
         'kode_barang',
         'nama_barang',
         'stok_minimal',
+        'satuan_dasar_id',
         'deskripsi',
     ];
 
@@ -24,6 +25,16 @@ class Item extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function units(): HasMany
+    {
+        return $this->hasMany(ItemUnit::class);
+    }
+
+    public function satuanDasar(): BelongsTo
+    {
+        return $this->belongsTo(ItemUnit::class, 'satuan_dasar_id');
     }
 
     public function stockIns(): HasMany

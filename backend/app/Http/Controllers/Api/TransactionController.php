@@ -15,7 +15,7 @@ class TransactionController extends Controller
         $startDate = $request->start_date;
         $endDate = $request->end_date;
 
-        $transactions = InventoryTransaction::with('item')
+        $transactions = InventoryTransaction::with(['item', 'unit'])
 
             ->when($search, function ($query) use ($search) {
                 $query->whereHas('item', function ($q) use ($search) {

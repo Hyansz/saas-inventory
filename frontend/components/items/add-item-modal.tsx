@@ -9,10 +9,24 @@ import {
 
 import { useEffect, useState } from "react";
 
-import { ChevronDown, Package2, LoaderCircle } from "lucide-react";
+import {
+    ChevronDown,
+    Package2,
+    LoaderCircle,
+    Plus,
+    Trash2,
+} from "lucide-react";
 
 import { getCategories } from "@/services/categories";
 import { createItem } from "@/services/items";
+
+interface UnitRow {
+    nama_unit: string;
+    konversi: string;
+    is_base: boolean;
+}
+
+const UNIT_OPTIONS = ["pcs", "pack/box", "karton"];
 
 interface Props {
     open: boolean;
@@ -33,6 +47,10 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
         deskripsi: "",
     });
 
+    const [units, setUnits] = useState<UnitRow[]>([
+        { nama_unit: "", konversi: "1", is_base: true },
+    ]);
+
     useEffect(() => {
         if (open) {
             fetchCategories();
@@ -49,8 +67,57 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
         }
     };
 
+    const baseUnitName =
+        units.find((u) => u.is_base)?.nama_unit || "satuan dasar";
+
+    const updateUnit = (index: number, patch: Partial<UnitRow>) => {
+        setUnits((prev) =>
+            prev.map((u, i) => (i === index ? { ...u, ...patch } : u)),
+        );
+    };
+
+    const setBaseUnit = (index: number) => {
+        setUnits((prev) =>
+            prev.map((u, i) => ({
+                ...u,
+                is_base: i === index,
+                konversi: i === index ? "1" : u.konversi,
+            })),
+        );
+    };
+
+    const addUnitRow = () => {
+        setUnits((prev) => [
+            ...prev,
+            { nama_unit: "", konversi: "1", is_base: false },
+        ]);
+    };
+
+    const removeUnitRow = (index: number) => {
+        setUnits((prev) => {
+            const next = prev.filter((_, i) => i !== index);
+
+            if (prev[index].is_base && next.length > 0) {
+                next[0].is_base = true;
+                next[0].konversi = "1";
+            }
+
+            return next;
+        });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (units.filter((u) => u.is_base).length !== 1) {
+            alert("Pilih tepat satu satuan dasar");
+            return;
+        }
+
+        if (units.some((u) => !u.nama_unit.trim())) {
+            alert("Nama satuan tidak boleh kosong");
+            return;
+        }
 
         try {
             setLoading(true);
@@ -58,6 +125,11 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
             await createItem({
                 ...form,
                 stok_minimal: Number(form.stok_minimal),
+                units: units.map((u) => ({
+                    nama_unit: u.nama_unit.trim(),
+                    konversi: Number(u.konversi),
+                    is_base: u.is_base,
+                })),
             });
 
             onSuccess();
@@ -71,6 +143,10 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
                 stok_minimal: "",
                 deskripsi: "",
             });
+
+            setUnits([
+                { nama_unit: "", konversi: "1", is_base: true },
+            ]);
         } catch (error) {
             console.log(error);
 
@@ -303,9 +379,15 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
 
                     {/* STOK */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-700">
-                            Stock Minimal
-                        </label>
+                        <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium text-zinc-700">
+                                Stock Minimal
+                            </label>
+
+                            <span className="text-xs text-zinc-400">
+                                dalam satuan: {baseUnitName}
+                            </span>
+                        </div>
 
                         <input
                             required
@@ -338,6 +420,189 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
                         />
                     </div>
 
+                    {/* SATUAN */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium text-zinc-700">
+                                Satuan Barang
+                            </label>
+
+                            <button
+                                type="button"
+                                onClick={addUnitRow}
+                                className="
+                                    inline-flex
+                                    items-center
+                                    gap-1
+                                    text-xs
+                                    font-semibold
+                                    text-zinc-600
+                                    hover:text-black
+                                    transition-colors
+                                    cursor-pointer
+                                "
+                            >
+                                <Plus size={14} />
+                                Tambah Satuan
+                            </button>
+                        </div>
+
+                        {units.map((unit, index) => (
+                            <div
+                                key={index}
+                                className="
+                                    rounded-2xl
+                                    border
+                                    border-zinc-200
+                                    bg-zinc-50/60
+                                    p-3
+                                    space-y-3
+                                "
+                            >
+                                <div className="flex items-center gap-2">
+                                    <label className="flex items-center gap-1.5 text-xs font-medium text-zinc-600 cursor-pointer shrink-0">
+                                        <input
+                                            type="radio"
+                                            checked={unit.is_base}
+                                            onChange={() =>
+                                                setBaseUnit(index)
+                                            }
+                                            className="accent-zinc-900"
+                                        />
+                                        Dasar
+                                    </label>
+
+                                    {units.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                removeUnitRow(index)
+                                            }
+                                            className="
+                                                ml-auto
+                                                text-zinc-400
+                                                hover:text-red-500
+                                                transition-colors
+                                                cursor-pointer
+                                            "
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="relative">
+                                        <select
+                                            required
+                                            value={unit.nama_unit}
+                                            onChange={(e) =>
+                                                updateUnit(index, {
+                                                    nama_unit: e.target.value,
+                                                })
+                                            }
+                                            className="
+                                                h-11
+                                                w-full
+                                                appearance-none
+                                                rounded-xl
+                                                border
+                                                border-zinc-200
+                                                bg-white
+                                                px-3
+                                                pr-8
+                                                text-sm
+                                                outline-none
+                                                focus:border-zinc-300
+                                                focus:ring-4
+                                                focus:ring-zinc-100
+                                                cursor-pointer
+                                            "
+                                        >
+                                            <option value="">
+                                                Pilih satuan
+                                            </option>
+
+                                            {UNIT_OPTIONS.filter(
+                                                (opt) =>
+                                                    unit.nama_unit === opt ||
+                                                    !units.some(
+                                                        (u, j) =>
+                                                            j !== index &&
+                                                            u.nama_unit ===
+                                                                opt,
+                                                    ),
+                                            ).map((opt) => (
+                                                <option
+                                                    key={opt}
+                                                    value={opt}
+                                                >
+                                                    {opt}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        <ChevronDown
+                                            size={14}
+                                            className="
+                                                pointer-events-none
+                                                absolute
+                                                right-2.5
+                                                top-1/2
+                                                -translate-y-1/2
+                                                text-zinc-400
+                                            "
+                                        />
+                                    </div>
+
+                                    <div className="relative">
+                                        <input
+                                            required
+                                            type="number"
+                                            step="any"
+                                            min="0.0001"
+                                            disabled={unit.is_base}
+                                            placeholder="1"
+                                            value={unit.konversi}
+                                            onChange={(e) =>
+                                                updateUnit(index, {
+                                                    konversi: e.target.value,
+                                                })
+                                            }
+                                            className="
+                                                h-11
+                                                w-full
+                                                rounded-xl
+                                                border
+                                                border-zinc-200
+                                                bg-white
+                                                px-3
+                                                text-sm
+                                                outline-none
+                                                focus:border-zinc-300
+                                                focus:ring-4
+                                                focus:ring-zinc-100
+                                                disabled:bg-zinc-100
+                                                disabled:text-zinc-400
+                                            "
+                                        />
+
+                                        {!unit.is_base && (
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 pointer-events-none">
+                                                = 1 {baseUnitName}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+
+                        <p className="text-xs text-zinc-400">
+                            Satuan dasar bebas dipilih (tidak harus pcs).
+                            Konversi = jumlah satuan dasar dalam 1 satuan ini.
+                        </p>
+                    </div>
+
                     {/* DESKRIPSI */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-zinc-700">
@@ -345,7 +610,7 @@ export default function AddItemModal({ open, onClose, onSuccess }: Props) {
                         </label>
 
                         <textarea
-                            rows={4}
+                            rows={3}
                             placeholder="Tambahkan deskripsi barang..."
                             value={form.deskripsi}
                             onChange={(e) =>

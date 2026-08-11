@@ -7,6 +7,7 @@ import TableEmpty from "@/components/ui/table-empty";
 import TableAction from "../ui/table-action";
 import InventoryCard from "../ui/inventory-card";
 import MobileCardList from "../ui/mobile-card-list";
+import { formatUnitQty } from "@/lib/unit-format";
 
 interface Props {
     items?: any[];
@@ -78,7 +79,7 @@ export default function StockInsTable({
                                         text-red-700
                                     "
                                 >
-                                    <ArrowUpRight size={14} />-{item.qty}
+                                    <ArrowUpRight size={14} />-{formatUnitQty(item)}
                                 </div>
                             }
                             action={
@@ -184,7 +185,7 @@ export default function StockInsTable({
                                 text-red-700
                             "
                                 >
-                                    <ArrowUpRight size={14} />-{item.qty}
+                                    <ArrowUpRight size={14} />-{formatUnitQty(item)}
                                 </div>
                             </td>
 
